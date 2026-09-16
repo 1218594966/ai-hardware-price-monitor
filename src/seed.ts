@@ -84,15 +84,16 @@ export const SEED_QUOTATIONS: SeedQuotationInput[] = [
   }
 ];
 
-/** 把「当前价 + 历史价数组」展开成带日期的价格记录 */
+/** 把「当前价 + 历史价数组」展开成价格记录；只保留最新一条（9 月 16 日） */
 export function buildSeedItems(list: SeedItemInput[]): QuotationItem[] {
   return list.map((o) => {
+    const latest = o.hist && o.hist.length ? o.hist[o.hist.length - 1] : o.price;
     const history = o.hist
-      ? SEED_DATES.map((date, i) => ({
-          date,
-          price: String(o.hist![i]),
-          note: i === 0 ? "首轮询价" : i === SEED_DATES.length - 1 ? "最新询价" : ""
-        }))
+      ? [{
+          date: SEED_DATES[SEED_DATES.length - 1],
+          price: String(latest),
+          note: "最新询价"
+        }]
       : [];
     return {
       id: uid("i"),

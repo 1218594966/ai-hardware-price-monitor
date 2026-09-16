@@ -213,11 +213,12 @@
   ];
   function buildSeedItems(list) {
     return list.map((o) => {
-      const history = o.hist ? SEED_DATES.map((date, i) => ({
-        date,
-        price: String(o.hist[i]),
-        note: i === 0 ? "首轮询价" : i === SEED_DATES.length - 1 ? "最新询价" : ""
-      })) : [];
+      const latest = o.hist && o.hist.length ? o.hist[o.hist.length - 1] : o.price;
+      const history = o.hist ? [{
+        date: SEED_DATES[SEED_DATES.length - 1],
+        price: String(latest),
+        note: "最新询价"
+      }] : [];
       return {
         id: uid("i"),
         name: o.name,
@@ -352,6 +353,29 @@
   function seedQuotations() {
     return buildSeedQuotations().map((q, i) => makeQuotation(q, i));
   }
+  function isPristineSeed(mapped) {
+    const raw = SEED_QUOTATIONS;
+    if (mapped.length !== raw.length) return false;
+    for (let i = 0; i < raw.length; i++) {
+      const q = mapped[i];
+      const rq = raw[i];
+      if (q.name !== rq.name || q.items.length !== rq.items.length) return false;
+      for (let j = 0; j < rq.items.length; j++) {
+        const it = q.items[j];
+        const ri = rq.items[j];
+        if (it.name !== ri.name || it.price !== String(ri.price) || it.qty !== String(ri.qty ?? 1)) {
+          return false;
+        }
+        const expect = ri.hist ? SEED_DATES.map((d, k) => ({ date: d, price: String(ri.hist[k]) })) : [];
+        const h = it.history || [];
+        if (h.length !== expect.length) return false;
+        for (let k = 0; k < expect.length; k++) {
+          if (h[k].date !== expect[k].date || h[k].price !== expect[k].price) return false;
+        }
+      }
+    }
+    return true;
+  }
   function load() {
     loadPrefs();
     let raw = null;
@@ -377,6 +401,13 @@
           if (isUnusedDefaults) {
             state.quotations = seedQuotations();
             state.activeId = state.quotations[0].id;
+            save(true);
+            return;
+          }
+          const activeIdx = Math.max(0, mapped.findIndex((q) => q.id === o.activeId));
+          if (isPristineSeed(mapped)) {
+            state.quotations = seedQuotations();
+            state.activeId = state.quotations[Math.min(activeIdx, state.quotations.length - 1)].id;
             save(true);
             return;
           }
@@ -962,8 +993,8 @@
       const prev = i > 0 ? util.num(h[i - 1].price) : null;
       const d = prev === null ? null : util.num(r.price) - prev;
       const cls = d === null || d === 0 ? "flat" : d > 0 ? "up" : "down";
-      const txt = d === null ? "首条" : d === 0 ? "0" : (d > 0 ? "+" : "−") + util.money(Math.abs(d));
-      return '<tr><td style="width:150px"><input type="date" data-ri="' + i + '" data-rf="date" value="' + util.esc(r.date) + '"></td><td style="width:132px"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + util.esc(r.price) + '" placeholder="0.00"></td><td class="rec-delta ' + cls + '" style="width:104px" data-rdelta="' + i + '">' + txt + '</td><td><input data-ri="' + i + '" data-rf="note" value="' + util.esc(r.note) + '" placeholder="备注…"></td><td style="width:52px;text-align:right">' + (i === h.length - 1 ? '<span class="tag">最新</span>' : "") + '</td><td style="width:44px;text-align:right"><button class="mini-btn del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td></tr>';
+      const txt = d === null ? h.length > 1 ? "首条" : "—" : d === 0 ? "0" : (d > 0 ? "+" : "−") + util.money(Math.abs(d));
+      return '<tr><td style="width:150px"><input type="date" data-ri="' + i + '" data-rf="date" value="' + util.esc(r.date) + '"></td><td style="width:132px"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + util.esc(r.price) + '" placeholder="0.00"></td><td class="rec-delta ' + cls + '" style="width:104px" data-rdelta="' + i + '">' + txt + '</td><td><input data-ri="' + i + '" data-rf="note" value="' + util.esc(r.note) + '" placeholder="备注…"></td><td style="width:52px;text-align:right">' + (i === h.length - 1 && h.length > 1 ? '<span class="tag">最新</span>' : "") + '</td><td style="width:44px;text-align:right"><button class="mini-btn del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td></tr>';
     }).join("");
     box.innerHTML = '<table class="rec-table"><thead><tr><th>日期</th><th style="text-align:right">单价 ¥</th><th style="text-align:right">环比</th><th>备注</th><th></th><th></th></tr></thead><tbody>' + rows + "</tbody></table>";
   }

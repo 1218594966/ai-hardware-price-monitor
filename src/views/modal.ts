@@ -86,14 +86,14 @@ function renderRecords(it: QuotationItem): void {
     const prev = i > 0 ? U.num(h[i - 1].price) : null;
     const d = prev === null ? null : U.num(r.price) - prev;
     const cls = d === null || d === 0 ? "flat" : d > 0 ? "up" : "down";
-    const txt = d === null ? "首条" : d === 0 ? "0" : (d > 0 ? "+" : "−") + U.money(Math.abs(d));
+    const txt = d === null ? (h.length > 1 ? "首条" : "—") : d === 0 ? "0" : (d > 0 ? "+" : "−") + U.money(Math.abs(d));
     return (
       "<tr>" +
       '<td style="width:150px"><input type="date" data-ri="' + i + '" data-rf="date" value="' + U.esc(r.date) + '"></td>' +
       '<td style="width:132px"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + U.esc(r.price) + '" placeholder="0.00"></td>' +
       '<td class="rec-delta ' + cls + '" style="width:104px" data-rdelta="' + i + '">' + txt + "</td>" +
       '<td><input data-ri="' + i + '" data-rf="note" value="' + U.esc(r.note) + '" placeholder="备注…"></td>' +
-      '<td style="width:52px;text-align:right">' + (i === h.length - 1 ? '<span class="tag">最新</span>' : "") + "</td>" +
+      '<td style="width:52px;text-align:right">' + (i === h.length - 1 && h.length > 1 ? '<span class="tag">最新</span>' : "") + "</td>" +
       '<td style="width:44px;text-align:right">' +
       '<button class="mini-btn del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td>' +
       "</tr>"
