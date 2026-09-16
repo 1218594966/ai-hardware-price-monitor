@@ -24,7 +24,7 @@
 - 涨红跌绿（中国习惯，映射 iOS 红 `#FF3B30` / 绿 `#34C759`）
 - 桌面 / 移动端自适应（窄屏侧栏变顶部横排）
 
-![看板预览](tests/.artifacts/audit-dashboard.png)
+![看板预览](docs/dashboard.png)
 
 ## 🧱 技术栈
 
