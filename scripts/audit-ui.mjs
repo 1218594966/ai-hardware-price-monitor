@@ -37,11 +37,11 @@ await page.goto("file://" + preview.replace(/\\/g, "/"), { waitUntil: "networkid
 await page.waitForTimeout(200);
 
 /* ---- 结构检查 ---- */
-ok((await page.locator("#qList .q-item").count()) === 5, "侧栏渲染 5 张报价单（3 默认 + 2 演示）");
+ok((await page.locator("#qList .q-item").count()) === 4, "侧栏渲染 4 张报价单（3 套默认 + 1 演示）");
 ok((await page.locator(".kpi.hero").count()) === 1, "渲染总价 hero KPI");
 ok((await page.locator("#segTrend").count()) === 1, "渲染走势分段控件");
-ok((await page.locator(".hw-card").count()) === 4, "渲染 4 张硬件卡片");
-ok(await page.locator(".card-body svg").count().then((n) => n >= 1), "总价走势 SVG 已渲染");
+ok((await page.locator(".hw-card").count()) === 14, "默认报价单渲染 14 张硬件卡片（含价格）");
+ok(await page.locator(".card-body svg").count().then((n) => n >= 1), "总价走势 SVG 已渲染（默认历史价）");
 ok(await page.locator(".hw-spark svg").count().then((n) => n >= 1), "迷你走势 SVG 已渲染");
 
 /* ---- 计算样式检查 ---- */

@@ -153,6 +153,8 @@ describe("1. 模块加载与启动", () => {
     expect(app).toBeTruthy();
 
     ok(S.all().length === 3, "默认生成 3 张报价单");
+    ok(S.all()[0].items.length > 0, "默认第一张报价单带示例硬件清单");
+    ok(S.all()[0].items[0].price !== "", "示例硬件带价格");
     eq(p.$$("#qList .q-item").length, 3, "左侧栏渲染出 3 个报价单卡片");
     ok(p.$("#qList .q-item.active") !== null, "第一张报价单处于选中态");
     ok(p.$(".q-title") !== null, "主区渲染出可编辑的报价单名称输入框");
@@ -204,8 +206,9 @@ describe("3. 编辑清单 / 增删改 / 自动记价", () => {
     const p = boot();
     const w = p.w;
 
-    const q = S.active()!;
-    eq(q.items.length, 0, "新报价单初始没有硬件");
+    const q = S.create("测试清单");
+    S.setActive(q.id);
+    eq(q.items.length, 0, "新建报价单初始没有硬件");
 
     app.setMode("editor");
     ok(p.$("table.sheet") !== null, "进入编辑模式后渲染出表格");
@@ -292,7 +295,8 @@ describe("4. 总价走势（含单日显示与口径切换）", () => {
     const p = boot();
     const w = p.w;
 
-    const q = S.active()!;
+    const q = S.create("走势测试");
+    S.setActive(q.id);
     S.addItem(q.id, { name: "整机", qty: "1", unit: "台", price: "100000" });
     S.addItem(q.id, { name: "硬盘", qty: "2", unit: "块", price: "30000" });
     app.renderAll();
@@ -355,7 +359,8 @@ describe("5. 单品价格明细弹窗", () => {
     const p = boot();
     const w = p.w;
 
-    const q = S.active()!;
+    const q = S.create("明细测试");
+    S.setActive(q.id);
     const it = S.addItem(q.id, { name: "GPU", qty: "2", unit: "块", price: "16000", brand: "NVIDIA", model: "RTX 4090" })!;
     S.upsertHistory(it, "2026-08-01", "18000", "");
     S.upsertHistory(it, "2026-09-01", "16000", "降价");
@@ -483,7 +488,8 @@ describe("7. 生成报价单", () => {
     const p = boot();
     const w = p.w;
 
-    const q = S.active()!;
+    const q = S.create("打印测试");
+    S.setActive(q.id);
     q.name = "边缘节点标准配置";
     S.addItem(q.id, { name: "GPU 显卡", brand: "NVIDIA", model: "RTX 4090 24G", spec: "24GB GDDR6X", qty: "2", unit: "块", price: "16800" });
     S.addItem(q.id, { name: "CPU", brand: "Intel", model: "Xeon W7", spec: "", qty: "1", unit: "颗", price: "32000" });
@@ -674,7 +680,7 @@ describe("9. 旧版数据自动迁移", () => {
     near(S.totalOf(q1, "total"), 16000 * 2 + 800, "旧版数据合计正确");
     eq(S.histOf(q1.items[0]).length, 2, "旧版价格历史保留");
     has(q1.note, "旧版", "迁移来源有标注");
-    eq(S.all()[1].items.length, 0, "另两张报价单是空的");
+    ok(S.all()[1].items.length > 0, "其它默认报价单保留示例配置");
     ok(!!p.w.localStorage.getItem("ai-quote-v1"), "迁移结果已写入新版存储键");
   });
 });
@@ -694,27 +700,29 @@ describe("10. 侧栏切换与报价单增删", () => {
     ok(p.$$("#qList .q-item")[2].classList.contains("active"), "选中态跟随移动");
     eq((p.$("#qTitle") as HTMLInputElement).value, S.all()[2].name, "主区跟着换成第 3 张");
 
-    /* 各自的配置互相独立 */
-    S.addItem(S.state.activeId!, { name: "只在第三张里", qty: "1", unit: "个", price: "100" });
+    /* 新建一张空清单，验证各报价单配置互相独立 */
+    const fresh = S.create("隔离测试");
+    S.setActive(fresh.id);
+    S.addItem(fresh.id, { name: "只在隔离清单里", qty: "1", unit: "个", price: "100" });
     app.renderAll();
-    eq(S.all()[2].items.length, 1, "第三张有 1 项");
-    eq(S.all()[0].items.length, 0, "第一张仍是空的（互不干扰）");
-    has(p.$(".hw-card")?.textContent, "只在第三张里", "看板显示的是当前那张");
+    eq(fresh.items.length, 1, "新清单有 1 项");
+    ok(S.all()[0].items.length > 0, "默认第一张仍保留示例清单（互不干扰）");
+    has(p.$(".hw-card")?.textContent, "只在隔离清单里", "看板显示的是当前那张");
 
     /* 复制 */
     click(w, p.btn("#qActions", "dup"));
-    eq(S.all().length, 4, "复制后变 4 张");
-    eq(S.all()[3].name, "报价单 3 副本", "副本名字带「副本」");
-    eq(S.all()[3].items.length, 1, "副本把硬件也复制了");
-    eq(S.state.activeId, S.all()[3].id, "复制后自动切到副本");
+    eq(S.all().length, 5, "复制后变 5 张");
+    eq(S.all()[4].name, "隔离测试 副本", "副本名字带「副本」");
+    eq(S.all()[4].items.length, 1, "副本把硬件也复制了");
+    eq(S.state.activeId, S.all()[4].id, "复制后自动切到副本");
 
     /* 副本是深拷贝，改它不影响原张 */
-    S.all()[3].items[0].price = "999";
-    eq(S.all()[2].items[0].price, "100", "副本与原张的硬件互不影响");
+    S.all()[4].items[0].price = "999";
+    eq(S.all()[3].items[0].price, "100", "副本与原张的硬件互不影响");
 
     /* 新建 */
     click(w, p.$("#btnNewQuote"));
-    eq(S.all().length, 5, "「＋ 新建」新增一张");
+    eq(S.all().length, 6, "「＋ 新建」新增一张");
     eq(app.mode(), "editor", "新建后直接进入编辑清单，方便录入");
 
     /* 删除 */
@@ -722,7 +730,7 @@ describe("10. 侧栏切换与报价单增删", () => {
     S.setActive(S.all()[0].id);
     app.renderAll();
     click(w, p.btn("#qActions", "del"));
-    eq(S.all().length, 4, "删除后剩 4 张");
+    eq(S.all().length, 5, "删除后剩 5 张");
 
     /* 只剩一张时不允许删 */
     while (S.all().length > 1) S.remove(S.all()[1].id);
@@ -740,7 +748,8 @@ describe("11. 「记录该日价格」与覆盖", () => {
     const p = boot();
     const w = p.w;
 
-    const q = S.active()!;
+    const q = S.create("记价测试");
+    S.setActive(q.id);
     S.addItem(q.id, { name: "A", qty: "1", unit: "个", price: "100" });
     S.addItem(q.id, { name: "B", qty: "1", unit: "个", price: "200" });
     S.addItem(q.id, { name: "C", qty: "1", unit: "个", price: "" });
@@ -787,8 +796,10 @@ describe("12. 持久化 / 刷新后数据仍在", () => {
     const p = boot();
     const w = p.w;
 
-    S.rename(S.active()!.id, "会持久化的名字");
-    S.addItem(S.active()!.id, { name: "持久化硬件", qty: "1", unit: "个", price: "123" });
+    const q = S.create("持久化");
+    S.setActive(q.id);
+    S.rename(q.id, "会持久化的名字");
+    S.addItem(q.id, { name: "持久化硬件", qty: "1", unit: "个", price: "123" });
     S.upsertHistory(S.active()!.items[0], "2026-09-01", "123", "");
     S.save(true);
 
@@ -834,9 +845,11 @@ describe("13. 首次运行默认报价单", () => {
     const names = S.all().map((q) => q.name);
     eq(names.length, 3, "默认 3 张");
     eq(names[0], "边缘节点标准配置", "第一张名为「边缘节点标准配置」");
-    eq(names[1], "报价单 2", "第二张为「报价单 2」");
-    eq(names[2], "报价单 3", "第三张为「报价单 3」");
+    eq(names[1], "轻量推理节点", "第二张为「轻量推理节点」");
+    eq(names[2], "双卡训练工作站", "第三张为「双卡训练工作站」");
     eq(S.all()[0].docNo.indexOf("Q-"), 0, "自动生成报价单编号");
+    ok(S.all()[0].items.length > 0, "默认报价单带示例硬件清单");
+    ok(S.histOf(S.all()[0].items[0]).length > 0, "默认报价单带历史价格走势");
     ok(p.$("#btnExport") !== null && p.$("#btnImport") !== null, "顶栏保留 JSON 导入导出");
     ok(p.$("#btnNewQuote") !== null, "侧栏顶部有「＋ 新建」");
   });

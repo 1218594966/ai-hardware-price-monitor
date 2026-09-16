@@ -3,6 +3,7 @@
    对应旧版 assets/js/store.js
    ========================================================= */
 import { uid, byDate, num, todayISO, pad2, toast, hasVal } from "./util";
+import { buildSeedQuotations } from "./seed";
 import type { Quotation, QuotationItem, PriceRecord, Term, TrendMode, SeriesPoint, Stats, Delta, TrendInfo } from "./types";
 
 const KEY = "ai-quote-v1";          // 新版数据结构
@@ -131,6 +132,11 @@ function makeQuotation(d: Partial<Quotation> = {}, index = 0): Quotation {
 
 /* ---------------- 初始化 ---------------- */
 
+/** 首次运行的默认配置：3 张带示例硬件价格的报价单 */
+function seedQuotations(): Quotation[] {
+  return buildSeedQuotations().map((q, i) => makeQuotation(q, i));
+}
+
 function load(): void {
   loadPrefs();
   let raw: string | null = null;
@@ -144,7 +150,7 @@ function load(): void {
     try {
       const o = JSON.parse(raw) as { quotations?: unknown[]; activeId?: string } | null;
       if (o && Array.isArray(o.quotations) && o.quotations.length) {
-        state.quotations = o.quotations.map((q, i) => {
+        const mapped = o.quotations.map((q, i) => {
           const qq = (q || {}) as Partial<Quotation>;
           qq.terms = makeTerms(qq.terms);
           if (!Array.isArray(qq.items)) qq.items = [];
@@ -153,6 +159,22 @@ function load(): void {
           if (!qq.id) qq.id = uid("q");
           return qq as Quotation;
         });
+
+        /* 数据升级：仅当本机数据是「上一版生成的 3 张空白默认清单」时，
+        换成带示例价格的默认配置（避免误伤用户主动导入的空清单） */
+        const EMPTY_TEMPLATE_NAMES = ["边缘节点标准配置", "报价单 2", "报价单 3"];
+        const isUnusedDefaults =
+          mapped.length === 3 &&
+          mapped.every((q) => !q.items.length) &&
+          mapped.every((q) => EMPTY_TEMPLATE_NAMES.includes(q.name));
+        if (isUnusedDefaults) {
+          state.quotations = seedQuotations();
+          state.activeId = state.quotations[0].id;
+          save(true);
+          return;
+        }
+
+        state.quotations = mapped;
         state.activeId = o.activeId || state.quotations[0].id;
         return;
       }
@@ -161,8 +183,9 @@ function load(): void {
     }
   }
 
-  // 首次运行：先把旧版数据接过来，再补两张空报价单
-  const q1 = makeQuotation({ name: "边缘节点标准配置", note: "", createdAt: todayISO() }, 0);
+  // 首次运行：用默认示例配置，并尝试接住旧版数据
+  const seeded = seedQuotations();
+  const q1 = seeded[0];
   let legacy: QuotationItem[] | null = null;
   try {
     const lraw = localStorage.getItem(LEGACY_KEY);
@@ -185,19 +208,17 @@ function load(): void {
             history: trimHistory(dd.history)
           };
         });
-        q1.note = "由旧版清单自动迁移";
       }
     }
   } catch {
     /* ignore */
   }
-  if (legacy) q1.items = legacy;
+  if (legacy) {
+    q1.items = legacy;
+    q1.note = "由旧版清单自动迁移";
+  }
 
-  state.quotations = [
-    q1,
-    makeQuotation({ name: "报价单 2", note: "点「编辑清单」录入硬件" }, 1),
-    makeQuotation({ name: "报价单 3", note: "点「编辑清单」录入硬件" }, 2)
-  ];
+  state.quotations = seeded;
   state.activeId = state.quotations[0].id;
   save(true);
 }
