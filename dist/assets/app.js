@@ -1437,6 +1437,11 @@
       if (series.length === 1) {
         body += '<div class="note">当前只有 <b>1 个记录日</b>（' + util.fmtDateCN(series[0].date) + "），显示的是当日基线；换个日期再记一次就会连成曲线。</div>";
       }
+      const vals = series.map((p) => p.price);
+      const flatMulti = series.length >= 2 && Math.min.apply(null, vals) === Math.max.apply(null, vals);
+      if (flatMulti) {
+        body += '<div class="note">这几天价格<b>完全相同</b>（可能是刚复制出来的），所以走势是一条平线；之后改价并「记录该日价格」，就能看到波动了。</div>';
+      }
       const last = series[series.length - 1];
       const cur = unit ? store.totalOf(q, "total") - sumQtyExtra(q) : store.totalOf(q, "total");
       if (Math.abs(last.price - cur) > 5e-3) {
@@ -1444,6 +1449,17 @@
       }
     }
     return '<div class="card"><div class="card-head"><div><div class="card-title">总价走势</div><div class="card-sub">' + (unit ? "按日期汇总各硬件<b>当日最近记录的单价</b>，不加数量" : "按日期汇总各硬件<b>当日最近记录的单价</b> × 数量") + '</div></div><div class="seg" id="segTrend"><button data-mode="total" class="' + (unit ? "" : "on") + '">实际总价</button><button data-mode="unit" class="' + (unit ? "on" : "") + '">单价之和</button></div></div><div class="card-body">' + body + "</div></div>";
+  }
+  function copySrcHTML(q) {
+    const dates = store.allDates(q);
+    if (!dates.length) {
+      return '<select class="sel-date" id="copySrc" disabled title="还没有价格记录日可复制"><option value="">暂无来源日</option></select>';
+    }
+    const target = document.getElementById("snapDate")?.value || util.todayISO();
+    const prev = dates.filter((d) => d < target);
+    const def = prev.length ? prev[prev.length - 1] : dates[dates.length - 1];
+    const opts = dates.map((d) => '<option value="' + d + '"' + (d === def ? " selected" : "") + ">" + util.fmtDateCN(d) + "</option>").join("");
+    return '<select class="sel-date" id="copySrc" title="选择要复制的来源价格日">' + opts + "</select>";
   }
   function html() {
     const q = store.active();
@@ -1458,7 +1474,7 @@
     } else {
       body = '<div class="sec-head"><h3>硬件价格走势</h3><span class="n">共 ' + q.items.length + ' 项 · 点卡片看价格明细</span></div><div class="hw-grid">' + q.items.map(hwCard).join("") + "</div>";
     }
-    return '<div class="q-head"><div class="q-head-l"><input class="q-title" id="qTitle" value="' + util.esc(q.name) + '" placeholder="给这张报价单起个名字" maxlength="60" title="点击可直接修改报价单名称"><input class="q-note" id="qNote" value="' + util.esc(q.note) + '" placeholder="备注（可选），例如：面向 XX 项目的两台节点" maxlength="120" title="点击可直接修改备注"><p class="q-doc-line">报价单编号 ' + util.esc(q.docNo) + " · 创建于 " + util.fmtDateCN(q.createdAt) + " · " + q.terms.length + ' 条报价条款</p></div><div class="q-actions" id="qActions"><input type="date" class="sel-date" id="snapDate" value="' + util.todayISO() + '"><button class="btn" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button><button class="btn" data-act="copy" title="把最近一个有价格记录的日子（如 9.16）的价格，一键复制到左边选中的日期（如 9.17）">复制上一日价格</button><button class="btn" data-act="terms" title="编辑这张报价单的条款">报价条款</button><button class="btn" data-act="dup" title="复制一份当前配置">复制</button><button class="btn primary" data-act="edit">编辑清单</button><button class="btn soft" data-act="quote">生成报价单</button><button class="btn danger" data-act="del">删除</button></div></div>' + kpisHTML(q, st, delta) + trendCardHTML(q) + body;
+    return '<div class="q-head"><div class="q-head-l"><input class="q-title" id="qTitle" value="' + util.esc(q.name) + '" placeholder="给这张报价单起个名字" maxlength="60" title="点击可直接修改报价单名称"><input class="q-note" id="qNote" value="' + util.esc(q.note) + '" placeholder="备注（可选），例如：面向 XX 项目的两台节点" maxlength="120" title="点击可直接修改备注"><p class="q-doc-line">报价单编号 ' + util.esc(q.docNo) + " · 创建于 " + util.fmtDateCN(q.createdAt) + " · " + q.terms.length + ' 条报价条款</p></div><div class="q-actions" id="qActions"><input type="date" class="sel-date" id="snapDate" value="' + util.todayISO() + '"><button class="btn" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button>' + copySrcHTML(q) + '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button><button class="btn" data-act="terms" title="编辑这张报价单的条款">报价条款</button><button class="btn" data-act="dup" title="复制一份当前配置">复制</button><button class="btn primary" data-act="edit">编辑清单</button><button class="btn soft" data-act="quote">生成报价单</button><button class="btn danger" data-act="del">删除</button></div></div>' + kpisHTML(q, st, delta) + trendCardHTML(q) + body;
   }
   function bind3() {
     const q = store.active();
@@ -1480,6 +1496,15 @@
     const noteEl = document.getElementById("qNote");
     if (noteEl) {
       noteEl.addEventListener("input", () => store.setNote(q.id, noteEl.value));
+    }
+    const snapDate = document.getElementById("snapDate");
+    if (snapDate) {
+      snapDate.addEventListener("change", () => {
+        const sel = document.getElementById("copySrc");
+        if (!sel || sel.disabled) return;
+        const prev = store.prevPriceDate(q.id, snapDate.value);
+        if (prev) sel.value = prev;
+      });
     }
     const seg = document.getElementById("segTrend");
     if (seg) {
@@ -1524,9 +1549,14 @@
           util.toast("已删除报价单");
         } else if (act === "copy") {
           const d = document.getElementById("snapDate").value || util.todayISO();
-          const src = store.prevPriceDate(q.id, d);
+          const sel = document.getElementById("copySrc");
+          const src = sel && !sel.disabled && sel.value || store.prevPriceDate(q.id, d) || "";
           if (!src) {
-            util.toast(util.fmtDateCN(d) + " 之前还没有价格记录日，无法复制 —— 可先用「记录该日价格」建个基线");
+            util.toast("还没有可复制的价格日 —— 先用「记录该日价格」建一个基线再复制");
+            return;
+          }
+          if (src === d) {
+            util.toast("来源与目标日期是同一天，无需复制");
             return;
           }
           const existed = store.countOnDate(q.id, d);
@@ -1562,6 +1592,17 @@
 
   // src/views/editor.ts
   var AUTOREC_KEY = "ai-quote-autorec";
+  function copySrcHTML2(q) {
+    const dates = store.allDates(q);
+    if (!dates.length) {
+      return '<select class="sel-date" id="copySrc" disabled title="还没有价格记录日可复制"><option value="">暂无来源日</option></select>';
+    }
+    const target = document.getElementById("snapDate2")?.value || util.todayISO();
+    const prev = dates.filter((d) => d < target);
+    const def = prev.length ? prev[prev.length - 1] : dates[dates.length - 1];
+    const opts = dates.map((d) => '<option value="' + d + '"' + (d === def ? " selected" : "") + ">" + util.fmtDateCN(d) + "</option>").join("");
+    return '<select class="sel-date" id="copySrc" title="选择要复制的来源价格日">' + opts + "</select>";
+  }
   function autoRecordOn() {
     const el = document.getElementById("autoRec");
     return el ? el.checked : true;
@@ -1576,7 +1617,7 @@
   function html2() {
     const q = store.active();
     if (!q) return '<div class="empty"><b>还没有报价单</b></div>';
-    return '<div class="q-head"><div class="q-head-l"><input class="q-title" id="eqTitle" value="' + util.esc(q.name) + '" placeholder="报价单名称" maxlength="60"><p class="q-doc-line">编辑清单 · 直接点单元格修改 · 单价留空按 0 计算 · 改完单价离开输入框会自动为当天留一条价格记录</p></div><div class="q-actions"><button class="btn primary" data-act="add">＋ 添加硬件</button><input type="date" class="sel-date" id="snapDate2" value="' + util.todayISO() + '"><button class="btn" data-act="snap">记录该日价格</button><button class="btn" data-act="copy" title="把最近一个有价格记录的日子（如 9.16）的价格，一键复制到左边选中的日期（如 9.17）">复制上一日价格</button><label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录"><input type="checkbox" id="autoRec" checked> 自动记价</label><button class="btn" data-act="done">完成，返回看板</button></div></div><div class="card"><div class="table-wrap"><table class="sheet"><thead><tr><th class="c-idx" style="text-align:center">序号</th><th class="c-name">产品名称</th><th class="c-brand">品牌</th><th class="c-model">型号</th><th class="c-spec">基本参数 / 说明</th><th class="c-qty" style="text-align:center">数量 / 单位</th><th class="c-price" style="text-align:right">单价 ¥</th><th class="c-sub" style="text-align:right">小计 ¥</th><th class="c-trend">价格走势</th><th class="c-link">商品链接</th><th class="c-act">操作</th></tr></thead><tbody id="sheetBody"></tbody><tfoot class="sum"><tr><td colspan="5" style="text-align:right;color:var(--ink-2);font-weight:500">合计</td><td style="text-align:center" id="fQty">0</td><td style="text-align:right;font-size:12px;color:var(--ink-3);font-weight:500" id="fPriced"></td><td class="t" id="fTotal">¥0.00</td><td colspan="3"></td></tr></tfoot></table></div></div>';
+    return '<div class="q-head"><div class="q-head-l"><input class="q-title" id="eqTitle" value="' + util.esc(q.name) + '" placeholder="报价单名称" maxlength="60"><p class="q-doc-line">编辑清单 · 直接点单元格修改 · 单价留空按 0 计算 · 改完单价离开输入框会自动为当天留一条价格记录</p></div><div class="q-actions"><button class="btn primary" data-act="add">＋ 添加硬件</button><input type="date" class="sel-date" id="snapDate2" value="' + util.todayISO() + '"><button class="btn" data-act="snap">记录该日价格</button>' + copySrcHTML2(q) + '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button><label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录"><input type="checkbox" id="autoRec" checked> 自动记价</label><button class="btn" data-act="done">完成，返回看板</button></div></div><div class="card"><div class="table-wrap"><table class="sheet"><thead><tr><th class="c-idx" style="text-align:center">序号</th><th class="c-name">产品名称</th><th class="c-brand">品牌</th><th class="c-model">型号</th><th class="c-spec">基本参数 / 说明</th><th class="c-qty" style="text-align:center">数量 / 单位</th><th class="c-price" style="text-align:right">单价 ¥</th><th class="c-sub" style="text-align:right">小计 ¥</th><th class="c-trend">价格走势</th><th class="c-link">商品链接</th><th class="c-act">操作</th></tr></thead><tbody id="sheetBody"></tbody><tfoot class="sum"><tr><td colspan="5" style="text-align:right;color:var(--ink-2);font-weight:500">合计</td><td style="text-align:center" id="fQty">0</td><td style="text-align:right;font-size:12px;color:var(--ink-3);font-weight:500" id="fPriced"></td><td class="t" id="fTotal">¥0.00</td><td colspan="3"></td></tr></tfoot></table></div></div>';
   }
   function renderSheet() {
     const q = store.active();
@@ -1643,6 +1684,15 @@
         sidebar.render();
       });
     }
+    const snapDate2 = document.getElementById("snapDate2");
+    if (snapDate2) {
+      snapDate2.addEventListener("change", () => {
+        const sel = document.getElementById("copySrc");
+        if (!sel || sel.disabled) return;
+        const prev = store.prevPriceDate(q.id, snapDate2.value);
+        if (prev) sel.value = prev;
+      });
+    }
     const head = document.querySelector(".q-actions");
     if (head) {
       head.addEventListener("click", (e) => {
@@ -1667,9 +1717,14 @@
           getApp().setMode("dashboard");
         } else if (act === "copy") {
           const d = document.getElementById("snapDate2").value || util.todayISO();
-          const src = store.prevPriceDate(q.id, d);
+          const sel = document.getElementById("copySrc");
+          const src = sel && !sel.disabled && sel.value || store.prevPriceDate(q.id, d) || "";
           if (!src) {
-            util.toast(util.fmtDateCN(d) + " 之前还没有价格记录日，无法复制 —— 可先用「记录该日价格」建个基线");
+            util.toast("还没有可复制的价格日 —— 先用「记录该日价格」建一个基线再复制");
+            return;
+          }
+          if (src === d) {
+            util.toast("来源与目标日期是同一天，无需复制");
             return;
           }
           const existed = store.countOnDate(q.id, d);

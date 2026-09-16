@@ -99,6 +99,14 @@ function trendCardHTML(q: Quotation): string {
         '<div class="note">当前只有 <b>1 个记录日</b>（' + U.fmtDateCN(series[0].date) +
         "），显示的是当日基线；换个日期再记一次就会连成曲线。</div>";
     }
+    /* 多个记录日但价格全部相同（常见于「复制某日价格」）——解释为何是一条平线 */
+    const vals = series.map((p) => p.price);
+    const flatMulti = series.length >= 2 && Math.min.apply(null, vals) === Math.max.apply(null, vals);
+    if (flatMulti) {
+      body +=
+        '<div class="note">这几天价格<b>完全相同</b>（可能是刚复制出来的），所以走势是一条平线；' +
+        "之后改价并「记录该日价格」，就能看到波动了。</div>";
+    }
     /* 走势取「当日最近记录价」，与清单当前的单价可能不同 —— 说清楚，并给出下一步 */
     const last = series[series.length - 1];
     const cur = unit ? S.totalOf(q, "total") - sumQtyExtra(q) : S.totalOf(q, "total");
@@ -126,6 +134,21 @@ function trendCardHTML(q: Quotation): string {
     '<div class="card-body">' + body + "</div>" +
     "</div>"
   );
+}
+
+/** 「复制该日价格」的来源日下拉框（列出该报价单所有价格记录日） */
+function copySrcHTML(q: Quotation): string {
+  const dates = S.allDates(q);
+  if (!dates.length) {
+    return '<select class="sel-date" id="copySrc" disabled title="还没有价格记录日可复制"><option value="">暂无来源日</option></select>';
+  }
+  const target = (document.getElementById("snapDate") as HTMLInputElement | null)?.value || U.todayISO();
+  const prev = dates.filter((d) => d < target);
+  const def = prev.length ? prev[prev.length - 1] : dates[dates.length - 1];
+  const opts = dates
+    .map((d) => '<option value="' + d + '"' + (d === def ? " selected" : "") + ">" + U.fmtDateCN(d) + "</option>")
+    .join("");
+  return '<select class="sel-date" id="copySrc" title="选择要复制的来源价格日">' + opts + "</select>";
 }
 
 function html(): string {
@@ -161,7 +184,8 @@ function html(): string {
     '<div class="q-actions" id="qActions">' +
     '<input type="date" class="sel-date" id="snapDate" value="' + U.todayISO() + '">' +
     '<button class="btn" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button>' +
-    '<button class="btn" data-act="copy" title="把最近一个有价格记录的日子（如 9.16）的价格，一键复制到左边选中的日期（如 9.17）">复制上一日价格</button>' +
+    copySrcHTML(q) +
+    '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button>' +
     '<button class="btn" data-act="terms" title="编辑这张报价单的条款">报价条款</button>' +
     '<button class="btn" data-act="dup" title="复制一份当前配置">复制</button>' +
     '<button class="btn primary" data-act="edit">编辑清单</button>' +
@@ -197,6 +221,17 @@ function bind(): void {
   const noteEl = document.getElementById("qNote") as HTMLInputElement | null;
   if (noteEl) {
     noteEl.addEventListener("input", () => S.setNote(q.id, noteEl.value));
+  }
+
+  /* 目标日期变化时，自动把来源日切到「当日前最近的价格日」 */
+  const snapDate = document.getElementById("snapDate") as HTMLInputElement | null;
+  if (snapDate) {
+    snapDate.addEventListener("change", () => {
+      const sel = document.getElementById("copySrc") as HTMLSelectElement | null;
+      if (!sel || sel.disabled) return;
+      const prev = S.prevPriceDate(q.id, snapDate.value);
+      if (prev) sel.value = prev;
+    });
   }
 
   /* 走势口径切换 */
@@ -248,9 +283,14 @@ function bind(): void {
         U.toast("已删除报价单");
       } else if (act === "copy") {
         const d = (document.getElementById("snapDate") as HTMLInputElement).value || U.todayISO();
-        const src = S.prevPriceDate(q.id, d);
+        const sel = document.getElementById("copySrc") as HTMLSelectElement | null;
+        const src = (sel && !sel.disabled && sel.value) || S.prevPriceDate(q.id, d) || "";
         if (!src) {
-          U.toast(U.fmtDateCN(d) + " 之前还没有价格记录日，无法复制 —— 可先用「记录该日价格」建个基线");
+          U.toast("还没有可复制的价格日 —— 先用「记录该日价格」建一个基线再复制");
+          return;
+        }
+        if (src === d) {
+          U.toast("来源与目标日期是同一天，无需复制");
           return;
         }
         const existed = S.countOnDate(q.id, d);

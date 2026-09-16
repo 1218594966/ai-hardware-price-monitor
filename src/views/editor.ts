@@ -8,9 +8,24 @@ import { store as S } from "../store";
 import { sidebar } from "./sidebar";
 import { modal } from "./modal";
 import { getApp } from "../appRef";
-import type { QuotationItem } from "../types";
+import type { Quotation, QuotationItem } from "../types";
 
 const AUTOREC_KEY = "ai-quote-autorec";
+
+/** 「复制该日价格」的来源日下拉框（列出该报价单所有价格记录日） */
+function copySrcHTML(q: Quotation): string {
+  const dates = S.allDates(q);
+  if (!dates.length) {
+    return '<select class="sel-date" id="copySrc" disabled title="还没有价格记录日可复制"><option value="">暂无来源日</option></select>';
+  }
+  const target = (document.getElementById("snapDate2") as HTMLInputElement | null)?.value || U.todayISO();
+  const prev = dates.filter((d) => d < target);
+  const def = prev.length ? prev[prev.length - 1] : dates[dates.length - 1];
+  const opts = dates
+    .map((d) => '<option value="' + d + '"' + (d === def ? " selected" : "") + ">" + U.fmtDateCN(d) + "</option>")
+    .join("");
+  return '<select class="sel-date" id="copySrc" title="选择要复制的来源价格日">' + opts + "</select>";
+}
 
 function autoRecordOn(): boolean {
   const el = document.getElementById("autoRec") as HTMLInputElement | null;
@@ -72,7 +87,8 @@ function html(): string {
     '<button class="btn primary" data-act="add">＋ 添加硬件</button>' +
     '<input type="date" class="sel-date" id="snapDate2" value="' + U.todayISO() + '">' +
     '<button class="btn" data-act="snap">记录该日价格</button>' +
-    '<button class="btn" data-act="copy" title="把最近一个有价格记录的日子（如 9.16）的价格，一键复制到左边选中的日期（如 9.17）">复制上一日价格</button>' +
+    copySrcHTML(q) +
+    '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button>' +
     '<label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录">' +
     '<input type="checkbox" id="autoRec" checked> 自动记价</label>' +
     '<button class="btn" data-act="done">完成，返回看板</button>' +
@@ -174,6 +190,17 @@ function bind(): void {
     });
   }
 
+  /* 目标日期变化时，自动把来源日切到「当日前最近的价格日」 */
+  const snapDate2 = document.getElementById("snapDate2") as HTMLInputElement | null;
+  if (snapDate2) {
+    snapDate2.addEventListener("change", () => {
+      const sel = document.getElementById("copySrc") as HTMLSelectElement | null;
+      if (!sel || sel.disabled) return;
+      const prev = S.prevPriceDate(q.id, snapDate2.value);
+      if (prev) sel.value = prev;
+    });
+  }
+
   /* 操作按钮 */
   const head = document.querySelector(".q-actions");
   if (head) {
@@ -200,9 +227,14 @@ function bind(): void {
         getApp().setMode("dashboard");
       } else if (act === "copy") {
         const d = (document.getElementById("snapDate2") as HTMLInputElement).value || U.todayISO();
-        const src = S.prevPriceDate(q.id, d);
+        const sel = document.getElementById("copySrc") as HTMLSelectElement | null;
+        const src = (sel && !sel.disabled && sel.value) || S.prevPriceDate(q.id, d) || "";
         if (!src) {
-          U.toast(U.fmtDateCN(d) + " 之前还没有价格记录日，无法复制 —— 可先用「记录该日价格」建个基线");
+          U.toast("还没有可复制的价格日 —— 先用「记录该日价格」建一个基线再复制");
+          return;
+        }
+        if (src === d) {
+          U.toast("来源与目标日期是同一天，无需复制");
           return;
         }
         const existed = S.countOnDate(q.id, d);

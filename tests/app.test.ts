@@ -874,9 +874,13 @@ describe("14. 一键复制某日价格", () => {
     /* 先建 9.16 基线（只有有单价的 3 项） */
     S.snapshotAll(q.id, "2026-09-16");
     eq(S.countOnDate(q.id, "2026-09-16"), 3, "9.16 基线记录 3 项（C 无单价被跳过）");
+    app.renderAll();
+    eq((p.$("#copySrc") as HTMLSelectElement).disabled, false, "有价格记录日后来源下拉可用");
+    eq((p.$("#copySrc") as HTMLSelectElement).value, "2026-09-16", "默认来源日 = 最近一个价格日");
 
-    /* 目标日 9.17：一键复制上一日 */
+    /* 目标日 9.17：选好来源日（默认 9.16），一键复制 */
     (p.$("#snapDate") as HTMLInputElement).value = "2026-09-17";
+    (p.$("#copySrc") as HTMLSelectElement).value = "2026-09-16";
     click(w, p.btn("#qActions", "copy"));
     eq(S.countOnDate(q.id, "2026-09-17"), 3, "9.17 复制到 3 项");
     eq(S.histOf(q.items[0]).filter((h) => h.date === "2026-09-17")[0].price, "100", "A 的 9.17 = 9.16 价格 100");
