@@ -3,7 +3,7 @@
    对应旧版 assets/js/store.js
    ========================================================= */
 import { uid, byDate, num, todayISO, pad2, toast, hasVal } from "./util";
-import { buildSeedQuotations, SEED_QUOTATIONS, SEED_DATES } from "./seed";
+import { buildSeedQuotations, SEED_QUOTATIONS, SEED_DATES, PREV_SEED_SPECS } from "./seed";
 import type { Quotation, QuotationItem, PriceRecord, Term, TrendMode, SeriesPoint, Stats, Delta, TrendInfo } from "./types";
 
 const KEY = "ai-quote-v1";          // 新版数据结构
@@ -138,8 +138,8 @@ function seedQuotations(): Quotation[] {
 }
 
 /**
- * 判断本机数据是否等于「上一版种的默认示例清单」（未被人改动过）。
- * 命中后会用新版默认配置整体替换 —— 例如默认价格只保留 9.16 的升级。
+ * 判断本机数据是否等于「默认示例清单的某个历史版本」（未被人修改过）。
+ * 命中后用新版默认配置整体替换 —— 用于把默认价格补全（基本参数只保留 9.16 等）的自动升级。
  */
 function isPristineSeed(mapped: Quotation[]): boolean {
   const raw = SEED_QUOTATIONS;
@@ -154,13 +154,18 @@ function isPristineSeed(mapped: Quotation[]): boolean {
       if (it.name !== ri.name || it.price !== String(ri.price) || it.qty !== String(ri.qty ?? 1)) {
         return false;
       }
-      const expect = ri.hist
-        ? SEED_DATES.map((d, k) => ({ date: d, price: String(ri.hist![k]) }))
-        : [];
-      const h = it.history || [];
-      if (h.length !== expect.length) return false;
-      for (let k = 0; k < expect.length; k++) {
-        if (h[k].date !== expect[k].date || h[k].price !== expect[k].price) return false;
+      /* 基本参数：允许等于新版、等于上一版（仅 3 项有说明）、或为空 —— 都视为未改动的默认数据 */
+      const prevSpec = PREV_SEED_SPECS[ri.name];
+      if (it.spec !== (ri.spec || "") && it.spec !== (prevSpec || "") && it.spec !== "") {
+        return false;
+      }
+      /* 历史价：日期必须是默认数据用过的日期，价格必须是该条目的已知种子价
+         （兼容 4 日期旧版 / 9.16 新版；用户自己改过的价格不会被误判为默认数据） */
+      const knownPrices = new Set((ri.hist || []).map((p) => String(p)));
+      knownPrices.add(String(ri.price));
+      for (const h of it.history || []) {
+        if (!SEED_DATES.includes(h.date)) return false;
+        if (!knownPrices.has(h.price)) return false;
       }
     }
   }
