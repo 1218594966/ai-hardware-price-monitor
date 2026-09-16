@@ -1,0 +1,37 @@
+{
+  "name": "ai-hardware-price-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI 一体机硬件价格监控与报价单管理系统 —— TypeScript 版，iOS 风格界面，纯前端、数据保存在本机",
+  "keywords": [
+    "quotation",
+    "price-monitor",
+    "typescript",
+    "ios-style",
+    "报价单",
+    "价格监控"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "preview": "node scripts/preview.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node tests/smoke-built.mjs",
+    "snapshot": "node scripts/snapshot.mjs",
+    "audit": "node scripts/audit-ui.mjs",
+    "verify": "npm run typecheck && npm run test && npm run build && npm run smoke && npm run snapshot && npm run audit"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.2",
+    "jsdom": "^25.0.1",
+    "playwright-core": "^1.63.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

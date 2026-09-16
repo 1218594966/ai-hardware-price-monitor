@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="D79dpgvhhzcdnVraPcR9C9">
+<head data-page-node-id="42MOJxHEU6c3ahotBMHY6Y">
+<meta charset="UTF-8" data-page-node-id="X3sElpfbEBq8Hk8rcQDUK5">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="mJVNbW9H6RfsKhpT9sYD7e">
+<title>AI 一体机 · 硬件价格监控</title>
+<style>
+:root{
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --border:#e4e7ec;
+  --border-strong:#d5dae2;
+  --text:#1d2129;
+  --muted:#6b7280;
+  --muted-2:#98a2b3;
+  --primary:#3b5bdb;
+  --primary-dark:#2f49b0;
+  --primary-soft:#eef2ff;
+  --danger:#e5484d;
+  --danger-soft:#fef2f2;
+  --warn:#b25e09;
+  --warn-soft:#fff7e6;
+  --ok:#0b8a4b;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 4px 16px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1680px;margin:0 auto;padding:22px 22px 80px;}
+
+/* ---------- 顶部 ---------- */
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+.page-head h1{font-size:21px;font-weight:700;margin:0 0 4px;letter-spacing:.2px;}
+.page-head .sub{color:var(--muted);font-size:13px;}
+.stamp{font-size:12px;color:var(--muted-2);text-align:right;white-space:nowrap;line-height:1.7;}
+
+/* ---------- 概览 ---------- */
+.summary{display:grid;grid-template-columns:minmax(300px,1.6fr) repeat(3,minmax(120px,1fr));gap:12px;margin-bottom:14px;}
+.total-card{
+  background:linear-gradient(135deg,#3b5bdb 0%,#5b7cfa 55%,#6f8ffb 100%);
+  color:#fff;border-radius:var(--radius);padding:16px 20px;position:relative;overflow:hidden;
+  box-shadow:0 6px 20px rgba(59,91,219,.28);
+}
+.total-card::after{content:"";position:absolute;right:-40px;top:-60px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.09);}
+.total-card .label{font-size:13px;opacity:.9;letter-spacing:.5px;}
+.total-card .amount{font-size:36px;font-weight:700;letter-spacing:.5px;margin-top:2px;font-variant-numeric:tabular-nums;position:relative;}
+.total-card .sub{font-size:12px;opacity:.85;margin-top:6px;position:relative;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow);}
+.stat .k{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.stat .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat .v small{font-size:12px;font-weight:500;color:var(--muted-2);margin-left:3px;}
+.stat.warn{border-color:#f5d9a8;background:var(--warn-soft);}
+.stat.warn .v{color:var(--warn);}
+.stat.ok .v{color:var(--ok);}
+
+/* ---------- 工具条 ---------- */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border-radius:9px;
+  border:1px solid var(--border-strong);background:#fff;color:var(--text);cursor:pointer;
+  font-size:13px;font-family:inherit;font-weight:500;transition:.15s;white-space:nowrap;
+}
+.btn:hover{background:#f8fafc;border-color:#b9c0cc;}
+.btn:active{transform:translateY(1px);}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(59,91,219,.25);}
+.btn.primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
+.btn.ghost-danger{color:var(--danger);border-color:#f3c7c9;}
+.btn.ghost-danger:hover{background:var(--danger-soft);border-color:#eba0a3;}
+.spacer{flex:1;}
+
+/* ---------- 表格 ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.table-wrap{overflow:auto;max-height:calc(100vh - 330px);min-height:260px;}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1700px;}
+thead th{
+  position:sticky;top:0;z-index:3;background:#f8fafc;color:var(--muted);
+  font-size:12px;font-weight:600;text-align:left;padding:10px 10px;letter-spacing:.3px;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+thead th.num,thead th.ctr{text-align:right;}
+thead th.ctr{text-align:center;}
+tbody td{padding:5px 10px;border-bottom:1px solid #f0f2f5;vertical-align:top;}
+tbody tr:hover td{background:#fafbfd;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.moved{animation:flash .6s ease;}
+@keyframes flash{0%{background:#eef2ff;}100%{background:transparent;}}
+
+.col-idx{width:52px;text-align:center;color:var(--muted-2);font-variant-numeric:tabular-nums;padding-top:12px !important;}
+.col-name{width:150px;}
+.col-brand{width:104px;}
+.col-model{width:210px;}
+.col-spec{width:340px;}
+.col-qty{width:112px;}
+.col-price{width:118px;}
+.col-sub{width:118px;}
+.col-link{width:230px;}
+.col-act{width:112px;}
+
+.cell-input{
+  width:100%;border:1px solid transparent;background:transparent;border-radius:8px;
+  padding:6px 8px;font:inherit;color:inherit;font-size:13px;transition:background .15s,border-color .15s,box-shadow .15s;
+}
+.cell-input::placeholder{color:#c2c8d0;}
+.cell-input:hover{background:#f7f9fc;border-color:var(--border);}
+.cell-input:focus{outline:none;background:#fff;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,91,219,.13);}
+textarea.cell-input{resize:none;overflow:hidden;line-height:1.55;padding-top:7px;font-size:12.5px;color:#3f4756;}
+.num-input{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.price-input{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--primary);}
+.price-input.empty{color:#c2c8d0;font-weight:400;}
+.qty-row{display:flex;gap:4px;}
+.qty-row .qty{width:46px;text-align:center;}
+.qty-row .unit{width:56px;text-align:center;color:var(--muted);font-size:12.5px;}
+.subtotal{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;padding-top:11px !important;white-space:nowrap;}
+.subtotal.zero{color:#c2c8d0;font-weight:400;}
+.link-cell{display:flex;gap:4px;align-items:center;}
+.link-cell .cell-input{font-size:12px;color:#5a6474;}
+.icon-btn{
+  flex:none;width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:#fff;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:.15s;padding:0;
+}
+.icon-btn:hover{background:var(--primary-soft);border-color:#c7d2fe;color:var(--primary);}
+.icon-btn.has-link{color:var(--primary);border-color:#c7d2fe;background:var(--primary-soft);}
+.act-cell{display:flex;gap:4px;align-items:center;justify-content:flex-end;padding-top:9px;}
+.icon-btn.del:hover{background:var(--danger-soft);border-color:#eba0a3;color:var(--danger);}
+.icon-btn:disabled{opacity:.3;cursor:not-allowed;}
+.empty-state{padding:56px 20px;text-align:center;color:var(--muted-2);}
+.empty-state .big{font-size:15px;color:var(--muted);margin-bottom:6px;}
+
+tfoot td{
+  position:sticky;bottom:0;background:#f8fafc;border-top:2px solid var(--border-strong);
+  padding:12px 10px;font-weight:700;font-size:13px;z-index:3;
+}
+tfoot .t-sub{text-align:right;font-variant-numeric:tabular-nums;color:var(--primary);font-size:15px;}
+
+.hint{color:var(--muted-2);font-size:12px;margin-top:10px;line-height:1.8;}
+.hint b{color:var(--muted);font-weight:600;}
+
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  background:#1d2129;color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;
+  transition:.25s;z-index:99;box-shadow:0 8px 26px rgba(0,0,0,.22);
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* ---------- 价格走势列 ---------- */
+.col-trend{width:150px;}
+.trend-wrap{cursor:pointer;border-radius:8px;}
+.trend-wrap .trend-cell{min-height:38px;height:100%;}
+.trend-cell{
+  display:flex;flex-direction:column;gap:1px;align-items:flex-start;justify-content:center;cursor:pointer;
+  padding:4px 7px;border-radius:8px;border:1px solid transparent;transition:.15s;min-height:38px;
+}
+.trend-cell:hover{background:var(--primary-soft);border-color:#c7d2fe;}
+.trend-cell.empty{color:var(--muted-2);font-size:12px;border:1px dashed var(--border-strong);align-items:center;text-align:center;line-height:1.3;}
+.trend-cell.empty:hover{color:var(--primary);border-color:#c7d2fe;}
+.spark{display:block;}
+.delta{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;}
+.delta.up{color:var(--danger);}
+.delta.down{color:var(--ok);}
+.delta.flat{color:var(--muted-2);font-weight:500;}
+
+/* ---------- 总价走势卡片 ---------- */
+.chart-card{margin-top:14px;padding:16px 18px 6px;}
+.chart-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+.cc-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.cc-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.cc-legend{font-size:12px;color:var(--muted-2);display:flex;gap:14px;align-items:center;padding-top:2px;}
+.cc-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+.chart-box{width:100%;}
+.chart{display:block;width:100%;height:auto;}
+.chart-empty{padding:38px 10px;text-align:center;color:var(--muted-2);font-size:13px;background:#f8fafc;border:1px dashed var(--border-strong);border-radius:12px;margin:10px 0 14px;}
+.chart-note{font-size:12px;color:var(--muted-2);text-align:center;padding:0 10px 14px;line-height:1.7;}
+.chart-note b{color:var(--primary);font-weight:600;}
+
+/* ---------- 走势明细弹窗 ---------- */
+.modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:22px;}
+.modal[hidden]{display:none !important;}
+.modal-bg{position:absolute;inset:0;background:rgba(16,24,40,.45);}
+.modal-panel{
+  position:relative;background:#fff;border-radius:16px;width:min(960px,100%);max-height:88vh;overflow:auto;
+  box-shadow:0 24px 60px rgba(16,24,40,.28);animation:pop .18s ease;
+}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:none;}}
+.modal-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:17px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:2;border-radius:16px 16px 0 0;
+}
+.m-title{font-size:17px;font-weight:700;}
+.m-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.modal-body{padding:16px 20px 22px;}
+.m-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;margin-bottom:14px;}
+.m-stat{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:9px 11px;}
+.m-stat .k{font-size:11.5px;color:var(--muted);margin-bottom:2px;}
+.m-stat .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
+.m-stat .v.up{color:var(--danger);}
+.m-stat .v.down{color:var(--ok);}
+.m-chart{border:1px solid var(--border);border-radius:12px;padding:10px 8px 4px;background:#fff;}
+.m-sec{font-size:13px;font-weight:700;margin:18px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.m-sec .n{font-weight:500;color:var(--muted-2);font-size:12px;}
+.rec-form{display:grid;grid-template-columns:152px 132px 1fr auto;gap:8px;}
+.rec-form input{
+  height:34px;min-width:0;border:1px solid var(--border-strong);border-radius:9px;padding:0 10px;
+  font:inherit;font-size:13px;background:#fff;color:inherit;
+}
+.rec-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,91,219,.13);}
+.rec-table{width:100%;border-collapse:separate;border-spacing:0;}
+.rec-table th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.rec-table td{padding:3px 8px;border-bottom:1px solid #f0f2f5;font-size:13px;color:#3f4756;}
+.rec-table tr:last-child td{border-bottom:none;}
+.rec-table input{width:100%;height:30px;min-width:0;border:1px solid transparent;background:transparent;border-radius:7px;padding:0 7px;font:inherit;font-size:13px;color:inherit;}
+.rec-table input:hover{background:#f7f9fc;border-color:var(--border);}
+.rec-table input:focus{outline:none;background:#fff;border-color:var(--primary);box-shadow:0 0 0 2px rgba(59,91,219,.12);}
+.rec-price{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:var(--primary);}
+.rec-delta{text-align:right;font-variant-numeric:tabular-nums;font-size:12px;white-space:nowrap;}
+.rec-delta.up{color:var(--danger);}
+.rec-delta.down{color:var(--ok);}
+.rec-delta.flat{color:var(--muted-2);}
+.rec-del:hover{background:var(--danger-soft);border-color:#eba0a3;color:var(--danger);}
+.m-empty{padding:26px 10px;text-align:center;color:var(--muted-2);font-size:13px;background:#f8fafc;border:1px dashed var(--border-strong);border-radius:12px;}
+.tag-latest{display:inline-block;font-size:10.5px;font-weight:600;color:var(--primary);background:var(--primary-soft);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:1px;white-space:nowrap;}
+.switch{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none;height:34px;padding:0 5px;}
+.switch input{width:15px;height:15px;accent-color:var(--primary);cursor:pointer;margin:0;}
+.date-input{height:34px;border:1px solid var(--border-strong);border-radius:9px;padding:0 10px;font:inherit;font-size:13px;background:#fff;color:inherit;}
+.date-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,91,219,.13);}
+
+@media print{
+  body{background:#fff;}
+  .wrap{padding:0;max-width:none;}
+  .toolbar,.col-act,.act-cell,.icon-btn,.toast,.stamp,.col-trend,.modal,.switch{display:none !important;}
+  .table-wrap{max-height:none;overflow:visible;}
+  thead th,tfoot td{position:static;}
+  .card{box-shadow:none;border:none;}
+  table{min-width:0;}
+  .total-card{box-shadow:none;border:1px solid var(--border);}
+}
+@media (max-width:900px){
+  .summary{grid-template-columns:1fr 1fr;}
+  .total-card{grid-column:1 / -1;}
+}
+</style>
+</head>
+<body data-page-node-id="DleRTZ6x7YxPAQhjBRi2Yv">
+<div class="wrap" data-page-node-id="2BpEzdpubNmAFojxGN7Hcf">
+
+  <div class="page-head" data-page-node-id="6vF7oTjWkCG4ZvO06nAlDf">
+    <div data-page-node-id="vpt7f5JrpFJQcGjY81ifsi">
+      <h1 data-page-node-id="raA34LzJFfvj2znkkhx2Cj">AI 一体机 · 硬件价格监控</h1>
+      <div class="sub" data-page-node-id="Zuf51uM9nfQyzRR93n1Qde">本地边缘节点配置清单 · 价格手动维护 · 数据保存在本机浏览器</div>
+    </div>
+    <div class="stamp" data-page-node-id="bmCzZxX1snxUSpsOxaWtFJ">
+      最后修改：<span id="lastSaved" data-page-node-id="BAAUxDgfUzAFgI3E2LEdM5">—</span><br data-page-node-id="pNcOFIbNwsfipNcAByf6Rf">
+      合计项目：<span id="itemCount" data-page-node-id="fPjjBdAVKK3tKSuixAgkvW">0</span> 项
+    </div>
+  </div>
+
+  <div class="summary" data-page-node-id="zLAlu0VMT0yFgRYMX8swri">
+    <div class="total-card" data-page-node-id="GoQBHA2UekLcWF41oxc5wD">
+      <div class="label" data-page-node-id="YIWhQC26pCNnKbUjOqE14Q">硬件 + 授权总价</div>
+      <div class="amount" id="totalAmount" data-page-node-id="3lBh4ANF1Q0FZBpEBUSxmb">¥0.00</div>
+      <div class="sub" id="totalBreakdown" data-page-node-id="q1xn85A2rtZH1Pm6vGs8Ax">含 0 项已报价硬件</div>
+    </div>
+    <div class="stat" data-page-node-id="u5hXg06TzRalOC1pg9WD09">
+      <div class="k" data-page-node-id="tFTY7pitRBZc4R7GyqVBUN">硬件总数量</div>
+      <div class="v" id="statQty" data-page-node-id="R0o5V3HRU7ISTdLwZLJX2h">0<small data-page-node-id="GRY18oLFWFJbK5su4mAaCC">件/套</small></div>
+    </div>
+    <div class="stat" id="statMissingCard" data-page-node-id="1z0hP2Cz7ILIQ8E7RHbsDD">
+      <div class="k" data-page-node-id="TgTvMjFVrFBvpkdvWwejml">未填价格</div>
+      <div class="v" id="statMissing" data-page-node-id="wjdp9SgGIXv3jKmPSq7ec2">0<small data-page-node-id="dPWd0LhWAXrHPRHhnDLO3N">项</small></div>
+    </div>
+    <div class="stat ok" data-page-node-id="IjGNuaqJUB2ov188cCJuea">
+      <div class="k" data-page-node-id="7XA7WUYcy9LkC42MWmCQ1m">已报价金额</div>
+      <div class="v" id="statPriced" data-page-node-id="7WFQcy1JTTxM6yGM3N97wI">¥0</div>
+    </div>
+  </div>
+
+  <div class="toolbar" data-page-node-id="8XJuCF6dAjyB6QUx7TY2K4">
+    <button class="btn primary" id="btnAdd" data-page-node-id="NnXkwQhTHN68GCGkorjlLC">＋ 添加硬件</button>
+    <input type="date" class="date-input" id="snapDate" title="选择要记录价格的日期">
+    <button class="btn" id="btnSnap" title="把所有已填单价的硬件，按上面选中的日期存一条价格记录" data-page-node-id="BTNSNAP">记录该日价格</button>
+    <label class="switch" title="在表格里改完单价、鼠标离开输入框时，自动为当天留下一条价格记录" data-page-node-id="SWAUTO"><input type="checkbox" id="autoRec" checked data-page-node-id="CHKAUTO"> 自动记价</label>
+    <button class="btn" id="btnExportJson" data-page-node-id="3jLF7glnVNtaagjnRtF4sR">导出 JSON</button>
+    <button class="btn" id="btnImportJson" data-page-node-id="AIEu3RdMeycWizrZvulJCN">导入 JSON</button>
+    <button class="btn" id="btnExportCsv" data-page-node-id="DwFkgrhZkO0TcfrmS3t1Y4">导出 CSV</button>
+    <button class="btn" id="btnPrint" data-page-node-id="xkzHNFkTFfRKwVcRSgoaXB">打印 / 存 PDF</button>
+    <div class="spacer" data-page-node-id="zdTnCV84zWIPBMEf8oFdoB"></div>
+    <button class="btn ghost-danger" id="btnReset" data-page-node-id="3aYx6fFHxYVwVAlwS23ACA">恢复默认清单</button>
+    <input type="file" id="fileInput" accept=".json,application/json" hidden data-page-node-id="L2s6Y2LxeQyg4Ya02JSYB1">
+  </div>
+
+  <div class="card" data-page-node-id="n4nH8IOtObHMomILNjL6u4">
+    <div class="table-wrap" data-page-node-id="GAjDgGGtle1xCqvvNaHv8D">
+      <table data-page-node-id="zO0rElHfFoX1wjEGyCNG0A">
+        <thead data-page-node-id="TOxHP0cv8xbKilIih3tAKr">
+          <tr data-page-node-id="u30gQU4vyrGudZuFZgZAMH">
+            <th class="col-idx ctr" data-page-node-id="nfWRBotJjyqvrJbHt5UeJ4">序号</th>
+            <th class="col-name" data-page-node-id="EV0YfGMDodbOkusRjWYimn">产品名称</th>
+            <th class="col-brand" data-page-node-id="AwAuiG3g2vhE4OMeA5smH3">品牌</th>
+            <th class="col-model" data-page-node-id="lt2xIHJ4YwN1KS51OzwreA">型号</th>
+            <th class="col-spec" data-page-node-id="DTgkjMfIhbyeXauKhWQtDB">基本参数 / 说明</th>
+            <th class="col-qty ctr" data-page-node-id="bHFoQsIpMOdFP9uAEzraXt">数量 / 单位</th>
+            <th class="col-price num" data-page-node-id="RLFa3Eftp37iqwwn3LGcC5">单价 ¥</th>
+            <th class="col-sub num" data-page-node-id="VH47GScivYlrPYHPX7xaRz">小计 ¥</th>
+            <th class="col-trend" data-page-node-id="TRENDHEAD">价格走势</th>
+            <th class="col-link" data-page-node-id="UIzqe3tuuq5FtwvQOAXFbo">商品链接</th>
+            <th class="col-act" data-page-node-id="PEkIHAO5J4JnJe1KlwSbSc">操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbody" data-page-node-id="6NVxHWaQMSNj6D56Zm0bQM"></tbody>
+        <tfoot data-page-node-id="oWoUM5TpaKGcnmBH0MT4Rx">
+          <tr data-page-node-id="TnXyn7jp2Gmi7W0OjkfqLE">
+            <td colspan="5" style="text-align:right;color:var(--muted);font-weight:500;" data-page-node-id="QHLpXYAEkAB2BCk3fJ5mZR">合计</td>
+            <td style="text-align:center" id="footQty" data-page-node-id="qkba6Uq3Zu1W4xI9eU1VnH">0</td>
+            <td style="text-align:right;color:var(--muted-2);font-weight:500;font-size:12px;" id="footPriced" data-page-node-id="9B5p7YHnzuu2mDhofTCA0T">0 项已报价</td>
+            <td class="t-sub" id="footTotal" data-page-node-id="xa5P7EPXR4LDH4N3gxn7VS">¥0.00</td>
+            <td colspan="3" data-page-node-id="6vBJ0yAwO0P7RqiSeCgoKw"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card chart-card" id="totalChartCard" data-page-node-id="TOTALCHARTCARD">
+    <div class="chart-card-head" data-page-node-id="CCHD">
+      <div data-page-node-id="CCLEFT">
+        <div class="cc-title" data-page-node-id="CCTITLE">总价走势<span class="tag-latest" id="totalPointCount" data-page-node-id="TPC">0 个记录日</span></div>
+        <div class="cc-sub" data-page-node-id="CCSUB">按日期汇总：每个日期取各硬件最近一次记录的单价 × 数量，加总得出当日总价</div>
+      </div>
+      <div class="cc-legend" data-page-node-id="CCLEG">
+        <span data-page-node-id="CCLEG1"><i style="background:#e5484d" data-page-node-id="CCLEG1A"></i>上涨</span>
+        <span data-page-node-id="CCLEG2"><i style="background:#0b8a4b" data-page-node-id="CCLEG2A"></i>下降</span>
+      </div>
+    </div>
+    <div class="chart-box" id="totalChart" data-page-node-id="TOTALCHARTBOX"></div>
+  </div>
+
+  <div class="hint" data-page-node-id="s1n2KGbrkR8bG07xoG3ykK">
+    <b data-page-node-id="7Vn7v1SeXQMu3MjRVAQKOy">怎么用：</b>直接在表格里点任意单元格就能改内容，单价留空按 0 计算 ·
+    <b data-page-node-id="BwdUfz7fCHdDpu2kk3q1fB">商品链接</b>列填入京东 / 淘宝 / 官网地址后，右侧 ↗ 按钮可直接跳转比价 ·
+    所有改动自动保存在本机浏览器，刷新不丢 · 换电脑用「导出 JSON」再「导入 JSON」即可。
+  </div>
+
+  <div class="hint" data-page-node-id="HINTTREND">
+    <b data-page-node-id="HINTTREND1">价格走势怎么用：</b>在表格里改完单价、鼠标点走的那一刻，会自动为<b data-page-node-id="HINTTREND2">当天</b>存一条价格记录（同一天只保留一条，重复修改是更新而不是新增）·
+    要补录历史报价，先在工具栏选好日期再点「记录该日价格」；要精确到某一项，点那行走势里的曲线，弹出明细后能逐条加、改、删 ·
+    攒到两个以上不同日期的记录，单品行情的曲线和下方「总价走势」图就会自动连成线（只记了 1 天也会先出一条基线）。
+  </div>
+
+</div>
+
+<div class="modal" id="modal" hidden data-page-node-id="MODAL">
+  <div class="modal-bg" data-close data-page-node-id="MODALBG"></div>
+  <div class="modal-panel" data-page-node-id="MODALPANEL">
+    <div class="modal-head" data-page-node-id="MODALHEAD">
+      <div data-page-node-id="MODALHEADL">
+        <div class="m-title" id="mTitle" data-page-node-id="MTITLE"></div>
+        <div class="m-sub" id="mSub" data-page-node-id="MSUB"></div>
+      </div>
+      <button class="icon-btn" data-close title="关闭" data-page-node-id="MODALCLOSE">✕</button>
+    </div>
+    <div class="modal-body" data-page-node-id="MODALBODY">
+      <div class="m-stats" id="mStats" data-page-node-id="MSTATS"></div>
+      <div class="m-chart" id="mChart" data-page-node-id="MCHART"></div>
+      <div class="m-sec" data-page-node-id="MSEC1">添加价格记录<span class="n" data-page-node-id="MSEC1N">日期可以选过去的，用来补录历史报价</span></div>
+      <div class="rec-form" data-page-node-id="RECFORM">
+        <input type="date" id="recDate" data-page-node-id="RECDATE">
+        <input type="text" id="recPrice" inputmode="decimal" placeholder="单价 ¥" data-page-node-id="RECPRICE">
+        <input type="text" id="recNote" placeholder="备注（可选），如：京东自营 / 含税报价" data-page-node-id="RECNOTE">
+        <button class="btn primary" id="recAdd" data-page-node-id="RECADD">添加</button>
+      </div>
+      <div class="m-sec" data-page-node-id="MSEC2">全部记录<span class="n" id="recCount" data-page-node-id="RECCOUNT"></span>
+        <div class="spacer" data-page-node-id="MSEC2SP"></div>
+        <button class="btn ghost-danger" id="recClear" data-page-node-id="RECCLEAR">清空该产品记录</button>
+      </div>
+      <div id="recList" data-page-node-id="RECLIST"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" data-page-node-id="z4cnCSQGcYBDn3kW65Juyw"></div>
+
+<script>
+(function(){
+"use strict";
+
+var STORAGE_KEY = "ai-hardware-price-v1";
+
+var DEFAULT_ITEMS = [
+  {name:"大模型显卡", qty:1, unit:"张", brand:"NVIDIA", model:"RTX 5090 32GB", spec:"物理显存不低于32GB，支撑本地大模型推理与长上下文计算。"},
+  {name:"数字孪生显卡", qty:1, unit:"张", brand:"七彩虹", model:"RTX5070 Ultra W OC 16G", spec:"物理显存不低于16GB，承担视觉识别管线（YOLO/OCR）与三维渲染并发负载。视觉管线按需加载预估显存≤12GB，UE孪生渲染预估≤4GB，合计≤16GB。"},
+  {name:"CPU散热", qty:1, unit:"式", brand:"利民", model:"420mm 一体式水冷", spec:"满足桌面静音型边缘节点连续运行散热要求。"},
+  {name:"CPU", qty:1, unit:"颗", brand:"Intel", model:"Core Ultra 9 285K", spec:"支撑容器编排、业务服务调度与多进程并发。"},
+  {name:"主板", qty:1, unit:"块", brand:"华硕", model:"ROG STRIX Z890-A", spec:"Z890 平台，满足高带宽存储、显卡与外设扩展需求。"},
+  {name:"内存", qty:1, unit:"组", brand:"十铨", model:"DDR5 96GB（48GB×2）6400MHz+", spec:"满足本地模型、RAG、数据库与数字孪生并发运行。"},
+  {name:"系统硬盘", qty:1, unit:"组", brand:"三星", model:"9100 Pro 2TB PCIe 5.0 NVMe ×2", spec:"作为系统盘、模型盘与高速权重加载介质。"},
+  {name:"存储硬盘", qty:2, unit:"块", brand:"希捷", model:"4TB 企业级机械硬盘", spec:"用于日志、时序数据与本地备份数据持久化。"},
+  {name:"电源", qty:1, unit:"式", brand:"", model:"1500W ATX 3.1 金牌全模组", spec:"满足高功耗显卡与满载运行供电冗余。"},
+  {name:"显示器", qty:1, unit:"台", brand:"AOC", model:"27 英寸 120Hz", spec:"用于本地数字孪生大屏、运维工作台与调试显示。"},
+  {name:"键鼠套装", qty:1, unit:"式", brand:"罗技", model:"MK106", spec:"用于现场基础运维与调试输入。"},
+  {name:"机箱", qty:1, unit:"台", brand:"Fractal Design", model:"Define 7 XL 全塔机箱", spec:"全塔静音机箱，满足桌面部署、风道与扩展空间要求。"},
+  {name:"UPS电源", qty:1, unit:"式", brand:"山特", model:"C6K 6KVA/5.4KW 内置电池一体机", spec:"提供市电异常缓冲、数据落盘与安全关机保障。"},
+  {name:"MaxKB授权", qty:1, unit:"式", brand:"飞致云", model:"企业版", spec:"知识库问答系统授权。"}
+];
+
+var items = [];
+var uidSeq = 0;
+
+/* ---------------- 工具函数 ---------------- */
+function uid(){ uidSeq++; return "i" + Date.now().toString(36) + uidSeq.toString(36); }
+
+function esc(s){
+  if(s === null || s === undefined) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function num(v){
+  if(v === null || v === undefined || v === "") return 0;
+  var n = parseFloat(String(v).replace(/[^0-9.\-]/g,""));
+  return isNaN(n) ? 0 : n;
+}
+
+function money(n){
+  var v = n || 0;
+  return "¥" + v.toLocaleString("zh-CN",{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function moneyShort(n){
+  var v = n || 0;
+  return "¥" + v.toLocaleString("zh-CN",{maximumFractionDigits:0});
+}
+
+function toast(msg){
+  var el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove("show"); }, 1900);
+}
+
+function normalizeLink(u){
+  var s = String(u || "").trim();
+  if(!s) return "";
+  if(!/^https?:\/\//i.test(s) && !/^(mailto:|tel:)/i.test(s)) s = "https://" + s;
+  return s;
+}
+
+/* ---------------- 数据 ---------------- */
+function makeItem(d){
+  d = d || {};
+  var hist = [];
+  if(Array.isArray(d.history)){
+    for(var i = 0; i < d.history.length; i++){
+      var hr = d.history[i] || {};
+      if(!hr.date) continue;
+      hist.push({
+        date: String(hr.date).slice(0, 10),
+        price: (hr.price === 0 || hr.price) ? String(hr.price) : "",
+        note: hr.note || ""
+      });
+    }
+    hist.sort(byDate);
+  }
+  return {
+    id: uid(),
+    name: d.name || "",
+    brand: d.brand || "",
+    model: d.model || "",
+    spec: d.spec || "",
+    qty: (d.qty === 0 || d.qty) ? String(d.qty) : "1",
+    unit: d.unit || "个",
+    price: (d.price === 0 || d.price) ? String(d.price) : "",
+    link: d.link || "",
+    history: hist,
+    updatedAt: d.updatedAt || ""
+  };
+}
+
+function defaultItems(){
+  return DEFAULT_ITEMS.map(makeItem);
+}
+
+function save(silent){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({items:items, savedAt:new Date().toISOString()}));
+    renderStamp();
+  }catch(e){
+    if(!silent) toast("保存失败：浏览器存储不可用");
+  }
+}
+
+function load(){
+  var raw = null;
+  try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ raw = null; }
+  if(raw){
+    try{
+      var obj = JSON.parse(raw);
+      var arr = Array.isArray(obj) ? obj : (obj && obj.items);
+      if(Array.isArray(arr) && arr.length){
+        items = arr.map(makeItem);
+        return;
+      }
+    }catch(e){ /* 数据损坏则回退默认 */ }
+  }
+  items = defaultItems();
+  save(true);
+}
+
+/* ---------------- 渲染 ---------------- */
+function rowHTML(it, idx, len){
+  var sub = num(it.qty) * num(it.price);
+  var hasPrice = String(it.price || "").trim() !== "";
+  return '' +
+  '<tr data-id="' + it.id + '">' +
+    '<td class="col-idx">' + (idx + 1) + '</td>' +
+    '<td><input class="cell-input" data-id="' + it.id + '" data-field="name" value="' + esc(it.name) + '" placeholder="产品名称"></td>' +
+    '<td><input class="cell-input" data-id="' + it.id + '" data-field="brand" value="' + esc(it.brand) + '" placeholder="品牌"></td>' +
+    '<td><input class="cell-input" data-id="' + it.id + '" data-field="model" value="' + esc(it.model) + '" placeholder="型号"></td>' +
+    '<td><textarea class="cell-input" rows="1" data-id="' + it.id + '" data-field="spec" placeholder="基本参数 / 说明">' + esc(it.spec) + '</textarea></td>' +
+    '<td><div class="qty-row">' +
+        '<input class="cell-input qty" data-id="' + it.id + '" data-field="qty" inputmode="decimal" value="' + esc(it.qty) + '" placeholder="1">' +
+        '<input class="cell-input unit" data-id="' + it.id + '" data-field="unit" value="' + esc(it.unit) + '" placeholder="个">' +
+    '</div></td>' +
+    '<td><input class="cell-input price-input' + (hasPrice ? '' : ' empty') + '" data-id="' + it.id + '" data-field="price" inputmode="decimal" value="' + esc(it.price) + '" placeholder="0.00" title="手动输入单价"></td>' +
+    '<td class="subtotal' + (sub > 0 ? '' : ' zero') + '" data-sub="' + it.id + '">' + (sub > 0 ? money(sub) : "—") + '</td>' +
+    '<td class="col-trend"><div class="trend-wrap" data-trend="' + it.id + '" data-act="trend" data-id="' + it.id + '" title="点击查看价格走势明细">' + trendCellInner(it) + '</div></td>' +
+    '<td><div class="link-cell">' +
+        '<input class="cell-input" data-id="' + it.id + '" data-field="link" value="' + esc(it.link) + '" placeholder="粘贴商品链接…">' +
+        '<button class="icon-btn' + (it.link ? ' has-link' : '') + '" data-act="open" data-id="' + it.id + '" title="打开商品链接">↗</button>' +
+    '</div></td>' +
+    '<td><div class="act-cell">' +
+        '<button class="icon-btn" data-act="up" data-id="' + it.id + '" title="上移"' + (idx === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="icon-btn" data-act="down" data-id="' + it.id + '" title="下移"' + (idx === len - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button class="icon-btn del" data-act="del" data-id="' + it.id + '" title="删除该硬件">✕</button>' +
+    '</div></td>' +
+  '</tr>';
+}
+
+function render(){
+  var tbody = document.getElementById("tbody");
+  if(!items.length){
+    tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="big">清单是空的</div><div>点左上角「＋ 添加硬件」开始录入</div></div></td></tr>';
+  }else{
+    tbody.innerHTML = items.map(function(it, i){ return rowHTML(it, i, items.length); }).join("");
+  }
+  autoGrowAll();
+  updateSummary();
+  renderStamp();
+  renderTotalChart();
+}
+
+function autoGrowAll(){
+  var list = document.querySelectorAll("textarea.cell-input");
+  for(var i = 0; i < list.length; i++){
+    var el = list[i];
+    el.style.height = "auto";
+    el.style.height = Math.max(32, el.scrollHeight) + "px";
+  }
+}
+
+function findItem(id){
+  for(var i = 0; i < items.length; i++){ if(items[i].id === id) return items[i]; }
+  return null;
+}
+
+function updateRowDerived(id){
+  var it = findItem(id);
+  if(!it) return;
+  var cell = document.querySelector('[data-sub="' + id + '"]');
+  if(!cell) return;
+  var sub = num(it.qty) * num(it.price);
+  cell.textContent = sub > 0 ? money(sub) : "—";
+  cell.className = "subtotal" + (sub > 0 ? "" : " zero");
+  var open = document.querySelector('[data-act="open"][data-id="' + id + '"]');
+  if(open){
+    if(String(it.link || "").trim()){ open.classList.add("has-link"); } else { open.classList.remove("has-link"); }
+  }
+}
+
+function updateSummary(){
+  var total = 0, priced = 0, missing = 0, qtySum = 0;
+  for(var i = 0; i < items.length; i++){
+    var it = items[i];
+    var p = String(it.price || "").trim();
+    qtySum += num(it.qty);
+    if(p === ""){ missing++; } else { priced++; total += num(it.price) * num(it.qty); }
+  }
+  document.getElementById("totalAmount").textContent = money(total);
+  document.getElementById("totalBreakdown").textContent = "含 " + priced + " 项已报价硬件" + (missing ? "，" + missing + " 项待填价" : "，清单已完整");
+  document.getElementById("statQty").innerHTML = qtySum + '<small>件/套</small>';
+  document.getElementById("statMissing").innerHTML = missing + '<small>项</small>';
+  document.getElementById("statPriced").textContent = moneyShort(total);
+  document.getElementById("statMissingCard").className = "stat" + (missing ? " warn" : " ok");
+  document.getElementById("itemCount").textContent = items.length;
+  document.getElementById("footQty").textContent = qtySum;
+  document.getElementById("footPriced").textContent = priced + " 项已报价";
+  document.getElementById("footTotal").textContent = money(total);
+}
+
+function renderStamp(){
+  var el = document.getElementById("lastSaved");
+  var raw = null;
+  try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){}
+  var t = new Date();
+  if(raw){ try{ t = new Date(JSON.parse(raw).savedAt || Date.now()); }catch(e){} }
+  var p = function(n){ return (n < 10 ? "0" : "") + n; };
+  el.textContent = t.getFullYear() + "-" + p(t.getMonth()+1) + "-" + p(t.getDate()) + " " + p(t.getHours()) + ":" + p(t.getMinutes());
+}
+
+/* ---------------- 交互 ---------------- */
+var tbody = document.getElementById("tbody");
+
+tbody.addEventListener("input", function(e){
+  var el = e.target;
+  var id = el.getAttribute("data-id");
+  if(!id) return;
+  var field = el.getAttribute("data-field");
+  if(!field) return;
+  var it = findItem(id);
+  if(!it) return;
+
+  if(field === "qty"){
+    var v = el.value.replace(/[^0-9]/g, "");
+    if(v !== el.value) el.value = v;
+    it.qty = v;
+  }else if(field === "price"){
+    var vp = el.value.replace(/[^0-9.]/g, "");
+    var parts = vp.split(".");
+    if(parts.length > 2) vp = parts[0] + "." + parts.slice(1).join("");
+    if(vp !== el.value) el.value = vp;
+    it.price = vp;
+    if(vp.trim() === ""){ el.classList.add("empty"); } else { el.classList.remove("empty"); }
+    it.updatedAt = new Date().toISOString();
+  }else if(field === "spec"){
+    it.spec = el.value;
+    el.style.height = "auto";
+    el.style.height = Math.max(32, el.scrollHeight) + "px";
+  }else{
+    it[field] = el.value;
+  }
+  updateRowDerived(id);
+  updateSummary();
+  save(true);
+});
+
+tbody.addEventListener("click", function(e){
+  var btn = e.target.closest ? e.target.closest("[data-act]") : null;
+  if(!btn) return;
+  var act = btn.getAttribute("data-act");
+  var id = btn.getAttribute("data-id");
+  var idx = -1;
+  for(var i = 0; i < items.length; i++){ if(items[i].id === id){ idx = i; break; } }
+  if(idx < 0) return;
+
+  if(act === "del"){
+    var it = items[idx];
+    var label = it.name || it.model || ("第 " + (idx+1) + " 项");
+    if(!confirm("确定从清单中删除「" + label + "」？")) return;
+    items.splice(idx, 1);
+    render(); save(); toast("已删除：" + label);
+  }
+  else if(act === "up" && idx > 0){
+    var tmp = items[idx-1]; items[idx-1] = items[idx]; items[idx] = tmp;
+    render(); save();
+  }
+  else if(act === "down" && idx < items.length - 1){
+    var tmp2 = items[idx+1]; items[idx+1] = items[idx]; items[idx] = tmp2;
+    render(); save();
+  }
+  else if(act === "open"){
+    var it2 = items[idx];
+    var url = normalizeLink(it2.link);
+    if(!url){
+      var inp = document.querySelector('input[data-field="link"][data-id="' + id + '"]');
+      if(inp) inp.focus();
+      toast("先填入商品链接再打开");
+      return;
+    }
+    if(url !== it2.link){ it2.link = url; var inp2 = document.querySelector('input[data-field="link"][data-id="' + id + '"]'); if(inp2) inp2.value = url; save(true); }
+    window.open(url, "_blank", "noopener");
+  }
+  else if(act === "trend"){
+    openTrendModal(id);
+  }
+});
+
+/* 单价改动提交（鼠标离开输入框）后，自动为当天留下一条价格记录 */
+tbody.addEventListener("change", function(e){
+  var el = e.target;
+  if(!el || el.getAttribute("data-field") !== "price") return;
+  if(!autoRecordOn()) return;
+  var id = el.getAttribute("data-id");
+  var it = findItem(id);
+  if(!it) return;
+  var v = String(el.value || "").trim();
+  if(v === "") return;
+  var d = todayISO();
+  var last = lastHistory(it);
+  if(last && last.date === d && num(last.price) === num(v)) return;
+  upsertHistory(it, d, v, "");
+  refreshTrendCell(id);
+  renderTotalChart();
+  save(true);
+  toast("已记录 " + fmtDateCN(d) + " 价格：" + money(num(v)));
+});
+
+document.getElementById("btnAdd").addEventListener("click", function(){
+  items.push(makeItem({name:"新硬件", qty:1, unit:"个", brand:"", model:"", spec:""}));
+  render(); save();
+  var rows = tbody.querySelectorAll("tr");
+  var last = rows[rows.length-1];
+  if(last){
+    last.classList.add("moved");
+    var inp = last.querySelector('input[data-field="name"]');
+    if(inp){ inp.focus(); inp.select(); }
+    last.scrollIntoView({block:"nearest", behavior:"smooth"});
+  }
+  toast("已添加，双击/直接输入修改名称");
+});
+
+document.getElementById("btnReset").addEventListener("click", function(){
+  if(!confirm("恢复为默认配置清单？当前填写的所有价格、商品链接和价格走势记录都会被覆盖，且无法撤销。")) return;
+  items = defaultItems();
+  render(); save(); toast("已恢复默认清单");
+});
+
+document.getElementById("btnExportJson").addEventListener("click", function(){
+  var payload = {
+    title: "AI一体机硬件价格清单",
+    exportedAt: new Date().toISOString(),
+    total: items.reduce(function(a, it){ return a + num(it.qty) * num(it.price); }, 0),
+    items: items
+  };
+  download("硬件价格清单-" + dateTag() + ".json", JSON.stringify(payload, null, 2), "application/json");
+});
+
+document.getElementById("btnImportJson").addEventListener("click", function(){
+  document.getElementById("fileInput").click();
+});
+
+document.getElementById("fileInput").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0];
+  if(!f) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var obj = JSON.parse(reader.result);
+      var arr = Array.isArray(obj) ? obj : obj.items;
+      if(!Array.isArray(arr) || !arr.length) throw new Error("empty");
+      if(!confirm("导入将覆盖当前清单（共 " + arr.length + " 项），继续？")) return;
+      items = arr.map(makeItem);
+      render(); save(); toast("成功导入 " + items.length + " 项");
+    }catch(err){
+      alert("导入失败：文件不是有效的清单 JSON。");
+    }
+    e.target.value = "";
+  };
+  reader.readAsText(f, "utf-8");
+});
+
+document.getElementById("btnExportCsv").addEventListener("click", function(){
+  var head = ["序号","产品名称","品牌","型号","基本参数","数量","单位","单价","小计","最新记录日","记录条数","商品链接"];
+  var lines = [head.join(",")];
+  var total = 0;
+  items.forEach(function(it, i){
+    var sub = num(it.qty) * num(it.price);
+    total += sub;
+    var h = histOf(it);
+    lines.push([i+1, it.name, it.brand, it.model, it.spec, it.qty, it.unit,
+      it.price === "" ? "" : num(it.price), sub === 0 ? "" : sub,
+      h.length ? h[h.length-1].date : "", h.length, it.link]
+      .map(function(v){ return '"' + String(v === null || v === undefined ? "" : v).replace(/"/g,'""') + '"'; }).join(","));
+  });
+  lines.push(['"合计"','','','','','','','','"' + total + '"','','',''].join(","));
+  download("硬件价格清单-" + dateTag() + ".csv", "\uFEFF" + lines.join("\r\n"), "text/csv;charset=utf-8");
+});
+
+document.getElementById("btnPrint").addEventListener("click", function(){ window.print(); });
+
+function dateTag(){
+  var t = new Date(), p = function(n){ return (n<10?"0":"")+n; };
+  return t.getFullYear() + p(t.getMonth()+1) + p(t.getDate()) + "-" + p(t.getHours()) + p(t.getMinutes());
+}
+
+function download(filename, content, mime){
+  var blob = new Blob([content], {type: mime || "text/plain;charset=utf-8"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+  toast("已导出：" + filename);
+}
+
+window.addEventListener("beforeunload", function(){ save(true); });
+
+/* ================= 价格历史 / 走势 ================= */
+
+/* ---------- 日期工具 ---------- */
+function pad2(n){ return (n < 10 ? "0" : "") + n; }
+function isoOf(d){ return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+function todayISO(){ return isoOf(new Date()); }
+function fmtDate(iso){ return String(iso).slice(5).replace("-", "/"); }
+function fmtDateCN(iso){
+  var a = String(iso).split("-");
+  if(a.length < 3) return iso;
+  return a[0] + "年" + parseInt(a[1],10) + "月" + parseInt(a[2],10) + "日";
+}
+function byDate(a, b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); }
+function histOf(it){ return (it.history || []).slice().sort(byDate); }
+function lastHistory(it){ var h = histOf(it); return h.length ? h[h.length-1] : null; }
+
+function upsertHistory(it, date, price, note){
+  if(!it.history) it.history = [];
+  var found = null;
+  for(var i = 0; i < it.history.length; i++){
+    if(it.history[i].date === date){ found = it.history[i]; break; }
+  }
+  if(found){
+    found.price = String(price);
+    if(note) found.note = note;
+  }else{
+    it.history.push({date: date, price: String(price), note: note || ""});
+  }
+  it.history.sort(byDate);
+}
+
+/* ---------- 自动记价开关 ---------- */
+var AUTOREC_KEY = "ai-hw-autorec";
+function autoRecordOn(){
+  var el = document.getElementById("autoRec");
+  return el ? !!el.checked : true;
+}
+function initAutoRec(){
+  var el = document.getElementById("autoRec");
+  var v = "1";
+  try{ v = localStorage.getItem(AUTOREC_KEY) || "1"; }catch(e){}
+  el.checked = (v !== "0");
+  el.addEventListener("change", function(){
+    try{ localStorage.setItem(AUTOREC_KEY, el.checked ? "1" : "0"); }catch(e){}
+    toast(el.checked ? "已开启：改完单价自动记当天" : "已关闭自动记价");
+  });
+}
+
+/* ---------- 迷你走势图 ---------- */
+function sparkSVG(h, color){
+  var w = 90, ht = 24, p = 2.5;
+  var vals = h.map(function(x){ return num(x.price); });
+  var n = vals.length;
+  if(!n) return "";
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var flat = (max === min);
+  var span = (max - min) || 1;
+  var pts = [];
+  for(var i = 0; i < n; i++){
+    var x = (n === 1) ? w/2 : (p + (w - 2*p) * i / (n-1));
+    var y = flat ? ht/2 : (p + (ht - 2*p) * (1 - (vals[i]-min)/span));
+    pts.push([x.toFixed(1), y.toFixed(1)]);
+  }
+  var s = '<svg class="spark" viewBox="0 0 ' + w + ' ' + ht + '" width="' + w + '" height="' + ht + '">';
+  if(n >= 2){
+    s += '<polyline points="' + pts.map(function(pt){ return pt[0] + ',' + pt[1]; }).join(' ') +
+         '" fill="none" stroke="' + color + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>';
+  }
+  s += '<circle cx="' + pts[n-1][0] + '" cy="' + pts[n-1][1] + '" r="2.6" fill="' + color + '"/>';
+  return s + '</svg>';
+}
+
+function trendInfo(it){
+  var h = histOf(it);
+  if(!h.length) return null;
+  var vals = h.map(function(x){ return num(x.price); });
+  var first = vals[0], last = vals[vals.length-1];
+  var diff = last - first;
+  var pct = (first !== 0) ? (diff / first * 100) : 0;
+  var cls = diff > 0 ? "up" : (diff < 0 ? "down" : "flat");
+  var color = diff > 0 ? "#e5484d" : (diff < 0 ? "#0b8a4b" : "#98a2b3");
+  return {h:h, vals:vals, first:first, last:last, diff:diff, pct:pct, cls:cls, color:color};
+}
+
+function trendCellInner(it){
+  var t = trendInfo(it);
+  if(!t){
+    return '<div class="trend-cell empty">暂无记录<br>点此记价</div>';
+  }
+  var label;
+  if(t.h.length < 2){
+    label = '<span class="delta flat">已记 ' + t.h.length + ' 天</span>';
+  }else{
+    var arrow = t.diff > 0 ? "↑ " : (t.diff < 0 ? "↓ " : "— ");
+    label = '<span class="delta ' + t.cls + '">' + arrow + Math.abs(t.pct).toFixed(1) + '%</span>';
+  }
+  var tip = t.h.length + " 个记录日：" + fmtDate(t.h[0].date) + " " + money(t.first) +
+            " → " + fmtDate(t.h[t.h.length-1].date) + " " + money(t.last);
+  return '<div class="trend-cell" title="' + esc(tip) + '">' + sparkSVG(t.h, t.color) + label + '</div>';
+}
+
+function refreshTrendCell(id){
+  var it = findItem(id);
+  if(!it) return;
+  var box = document.querySelector('[data-trend="' + id + '"]');
+  if(box) box.innerHTML = trendCellInner(it);
+}
+function refreshAllTrendCells(){
+  for(var i = 0; i < items.length; i++) refreshTrendCell(items[i].id);
+}
+
+/* ---------- 折线图 ---------- */
+var chartSeq = 0;
+
+/* 取「好看」的刻度步长：1 / 2 / 2.5 / 5 / 10 的十倍幂 */
+function niceStep(raw){
+  if(!(raw > 0) || !isFinite(raw)) return 1;
+  var mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+  var norm = raw / mag;
+  var mult = norm <= 1 ? 1 : (norm <= 2 ? 2 : (norm <= 2.5 ? 2.5 : (norm <= 5 ? 5 : 10)));
+  return mult * mag;
+}
+
+/* 轴刻度文字：精度随步长自适应，避免"¥1.4万 ¥1.4万"这种重复标签 */
+function axisLabel(v, step){
+  if(Math.round(v) === 0) return "¥0";
+  if(step >= 5000) return "¥" + (v / 10000).toFixed(1).replace(/\.0$/, "") + "万";
+  if(step >= 1) return "¥" + Math.round(v).toLocaleString("zh-CN");
+  return "¥" + v.toFixed(1);
+}
+
+/* 数据点标注：尽量保留精确值，只在确实过长时才缩写 */
+function pointLabel(v){
+  var a = Math.abs(v);
+  if(a >= 100000000) return "¥" + (v / 100000000).toFixed(2).replace(/\.?0+$/, "") + "亿";
+  if(a >= 1000000) return "¥" + (v / 10000).toFixed(1).replace(/\.0$/, "") + "万";
+  return "¥" + Math.round(v).toLocaleString("zh-CN");
+}
+
+/* 选轴：从候选步长里挑「刻度数接近 4~5 条、且上下边界浪费最少」的那个，
+   避免出现 ¥0 起步、半张画布空着的情况 */
+function chooseScale(lo, hi){
+  if(!(hi > lo)) hi = lo + (Math.abs(lo) * 0.1 || 100);
+  var span = hi - lo;
+  var best = null;
+  for(var n = 3; n <= 8; n++){
+    var s = niceStep(span / n);
+    if(!(s > 0)) continue;
+    var mn = Math.floor(lo / s) * s;
+    var mx = Math.ceil(hi / s) * s;
+    if(mx <= mn) mx = mn + s;
+    var ticks = Math.round((mx - mn) / s);
+    var waste = ((lo - mn) + (mx - hi)) / span;
+    var score = Math.abs(ticks - 4.5) + waste * 2;
+    if(!best || score < best.score){ best = {step: s, min: mn, max: mx, ticks: ticks, score: score}; }
+  }
+  return best;
+}
+
+function chartSVG(points, opt){
+  opt = opt || {};
+  var W = opt.width || 900, H = opt.height || 250;
+  var padL = 78, padR = 26, padT = 24, padB = 34;
+  var n = points.length;
+  if(!n) return '<div class="chart-empty">暂无数据</div>';
+
+  var vals = points.map(function(p){ return num(p.price); });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if(lo === hi){ var d0 = Math.abs(lo) * 0.08 || 100; lo -= d0; hi += d0; }
+  var sc = chooseScale(lo, hi);
+  var min = sc.min, max = sc.max, step = sc.step, ticks = sc.ticks;
+  var range = max - min;
+  var iw = W - padL - padR, ih = H - padT - padB;
+
+  var times = points.map(function(p){ return new Date(p.date + "T00:00:00").getTime(); });
+  var t0 = times[0], t1 = times[n-1];
+  function X(i){ return (t1 === t0) ? (padL + iw * (n === 1 ? 0.5 : i/(n-1))) : (padL + iw * (times[i]-t0)/(t1-t0)); }
+  function Y(v){ return padT + ih * (1 - (v - min)/range); }
+
+  var diff = vals[n-1] - vals[0];
+  var color = diff > 0 ? "#e5484d" : (diff < 0 ? "#0b8a4b" : "#3b5bdb");
+  var gid = "cgrad" + (++chartSeq);
+
+  var svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+  svg += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
+         '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.22"/>' +
+         '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.02"/></linearGradient></defs>';
+
+  var steps = ticks, k, v, y;
+  for(k = 0; k <= steps; k++){
+    v = min + step * k;
+    y = Y(v);
+    svg += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W-padR) + '" y2="' + y.toFixed(1) + '" stroke="#eef1f5" stroke-width="1"/>';
+    svg += '<text x="' + (padL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#98a2b3">' + axisLabel(v, step) + '</text>';
+  }
+
+  var idxs = [];
+  if(n <= 6){ for(k = 0; k < n; k++) idxs.push(k); }
+  else{ for(k = 0; k < 5; k++) idxs.push(Math.round(k * (n-1) / 4)); }
+  var seenIdx = {};
+  for(k = 0; k < idxs.length; k++){
+    var ii = idxs[k];
+    if(seenIdx[ii]) continue;
+    seenIdx[ii] = 1;
+    svg += '<text x="' + X(ii).toFixed(1) + '" y="' + (H - padB + 19) + '" text-anchor="middle" font-size="11" fill="#98a2b3">' + fmtDate(points[ii].date) + '</text>';
+  }
+
+  var sx = [], sy = [];
+  for(k = 0; k < n; k++){ sx.push(X(k)); sy.push(Y(vals[k])); }
+
+  var single = (n === 1);
+
+  if(single){
+    // 单点：不画面积和折线，改画一条虚线基线，标出当前水位
+    svg += '<line x1="' + padL + '" y1="' + sy[0].toFixed(1) + '" x2="' + (W - padR) + '" y2="' + sy[0].toFixed(1) +
+           '" stroke="' + color + '" stroke-width="1.8" stroke-dasharray="6 5" stroke-opacity="0.55"/>';
+  }else{
+    svg += '<path d="M' + sx[0].toFixed(1) + ',' + (padT + ih) + ' ' +
+           sx.map(function(x, i2){ return 'L' + x.toFixed(1) + ',' + sy[i2].toFixed(1); }).join(' ') +
+           ' L' + sx[n-1].toFixed(1) + ',' + (padT + ih) + ' Z" fill="url(#' + gid + ')"/>';
+    svg += '<polyline points="' + sx.map(function(x, i3){ return x.toFixed(1) + ',' + sy[i3].toFixed(1); }).join(' ') +
+           '" fill="none" stroke="' + color + '" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
+  }
+
+  for(k = 0; k < n; k++){
+    var r = single ? 5.2 : 3.6;
+    svg += '<circle cx="' + sx[k].toFixed(1) + '" cy="' + sy[k].toFixed(1) + '" r="' + r + '" fill="#fff" stroke="' + color + '" stroke-width="2.4">' +
+           '<title>' + esc(points[k].date) + '　' + money(vals[k]) + '</title></circle>';
+    if(n <= 8){
+      var anchor = (k === 0 && n > 1) ? "start" : (k === n-1 && n > 1 ? "end" : "middle");
+      svg += '<text x="' + sx[k].toFixed(1) + '" y="' + (sy[k] - 12).toFixed(1) + '" text-anchor="' + anchor +
+             '" font-size="' + (single ? 13 : 10.5) + '" font-weight="700" fill="' + color + '">' + pointLabel(vals[k]) + '</text>';
+    }
+  }
+  return svg + '</svg>';
+}
+
+/* ---------- 总价走势 ---------- */
+function allHistoryDates(){
+  var seen = {};
+  for(var i = 0; i < items.length; i++){
+    var h = items[i].history || [];
+    for(var j = 0; j < h.length; j++) seen[h[j].date] = 1;
+  }
+  return Object.keys(seen).sort();
+}
+function priceAsOf(it, d){
+  var h = histOf(it);
+  if(!h.length) return num(it.price);
+  var v = null;
+  for(var i = 0; i < h.length; i++){ if(h[i].date <= d) v = h[i]; }
+  if(!v) v = h[0];
+  return num(v.price);
+}
+function renderTotalChart(){
+  var box = document.getElementById("totalChart");
+  if(!box) return;
+  var dates = allHistoryDates();
+  var cnt = document.getElementById("totalPointCount");
+  if(cnt) cnt.textContent = dates.length ? (dates.length + " 个记录日") : "暂无记录";
+
+  if(!dates.length){
+    box.innerHTML = '<div class="chart-empty">还没有任何价格记录 —— 在工具栏选好日期点「记录该日价格」，或直接在清单里改单价（会自动记下当天）</div>';
+    return;
+  }
+  var pts = dates.map(function(d){
+    var sum = 0;
+    for(var i = 0; i < items.length; i++) sum += priceAsOf(items[i], d) * num(items[i].qty);
+    return {date: d, price: sum};
+  });
+
+  // 只有 1 个记录日也照常出图：画成一条基线 + 单点
+  box.innerHTML = chartSVG(pts, {width: 900, height: 250});
+  if(dates.length === 1){
+    var note = document.createElement("div");
+    note.className = "chart-note";
+    note.innerHTML = '当前只有 <b>1 个记录日</b>（' + fmtDateCN(dates[0]) + '），上面显示的是当日总价基线；换个日期再记录一次，就会连成走势曲线。';
+    box.appendChild(note);
+  }
+}
+
+/* ---------- 走势明细弹窗 ---------- */
+var modalItemId = null;
+var _chartTimer = null;
+function scheduleTotalChart(){ clearTimeout(_chartTimer); _chartTimer = setTimeout(renderTotalChart, 420); }
+
+function afterHistoryChange(scheduled){
+  if(modalItemId) refreshTrendCell(modalItemId);
+  if(scheduled){ scheduleTotalChart(); } else { renderTotalChart(); }
+  save(true);
+}
+
+function mStatCard(k, v, cls){
+  return '<div class="m-stat"><div class="k">' + k + '</div><div class="v' + (cls ? ' ' + cls : '') + '">' + v + '</div></div>';
+}
+
+function statsHTML(t, it){
+  if(!t){
+    return mStatCard("记录条数", "0") +
+           mStatCard("当前单价", String(it.price).trim() === "" ? "—" : money(num(it.price)));
+  }
+  var vals = t.vals;
+  var mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals);
+  var sum = 0;
+  for(var i = 0; i < vals.length; i++) sum += vals[i];
+  var avg = sum / vals.length;
+  var sign = t.diff > 0 ? "+" : "−";
+  var chg = (t.diff === 0)
+    ? '<div class="v flat" style="font-size:13px">持平</div>'
+    : '<div class="v ' + t.cls + '" style="font-size:13px">' + sign + money(Math.abs(t.diff)) + '（' + sign + Math.abs(t.pct).toFixed(2) + '%）</div>';
+  return mStatCard("记录条数", t.h.length + " 条") +
+         mStatCard("最新单价", money(t.last)) +
+         mStatCard("首次单价", money(t.first)) +
+         '<div class="m-stat"><div class="k">累计变动</div>' + chg + '</div>' +
+         mStatCard("最高", money(mx)) +
+         mStatCard("最低", money(mn)) +
+         mStatCard("平均", money(avg));
+}
+
+function renderRecList(){
+  var it = findItem(modalItemId);
+  if(!it) return;
+  var h = histOf(it);
+  var rc = document.getElementById("recCount");
+  if(rc) rc.textContent = h.length ? ("共 " + h.length + " 条，按日期升序") : "";
+  var box = document.getElementById("recList");
+  if(!h.length){
+    box.innerHTML = '<div class="m-empty">暂无价格记录</div>';
+    return;
+  }
+  var rows = h.map(function(r, i){
+    var prev = i > 0 ? num(h[i-1].price) : null;
+    var d = (prev === null) ? null : (num(r.price) - prev);
+    var dcls = (d === null || d === 0) ? "flat" : (d > 0 ? "up" : "down");
+    var dtxt = (d === null || d === 0) ? (d === null ? "首条" : "0") : ((d > 0 ? "+" : "−") + money(Math.abs(d)));
+    var isLatest = (i === h.length - 1);
+    return '<tr>' +
+      '<td style="width:150px"><input type="date" data-ri="' + i + '" data-rf="date" value="' + esc(r.date) + '"></td>' +
+      '<td style="width:132px"><input class="rec-price" data-ri="' + i + '" data-rf="price" inputmode="decimal" value="' + esc(r.price) + '"></td>' +
+      '<td class="rec-delta ' + dcls + '" style="width:104px" data-rdelta="' + i + '">' + dtxt + '</td>' +
+      '<td><input data-ri="' + i + '" data-rf="note" value="' + esc(r.note) + '" placeholder="备注…"></td>' +
+      '<td style="width:52px;text-align:right">' + (isLatest ? '<span class="tag-latest">最新</span>' : '') + '</td>' +
+      '<td style="width:44px;text-align:right"><button class="icon-btn rec-del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td>' +
+    '</tr>';
+  }).join("");
+  box.innerHTML = '<table class="rec-table"><thead><tr>' +
+    '<th>日期</th><th style="text-align:right">单价 ¥</th><th style="text-align:right">环比</th><th>备注</th><th></th><th></th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function refreshModalDerived(){
+  var it = findItem(modalItemId);
+  if(!it) return;
+  var t = trendInfo(it);
+  var ms = document.getElementById("mStats");
+  if(ms) ms.innerHTML = statsHTML(t, it);
+  var mc = document.getElementById("mChart");
+  if(mc){
+    mc.innerHTML = t
+      ? chartSVG(t.h, {width: 900, height: 250})
+      : '<div class="chart-empty">还没有价格记录<br><span style="font-size:12px">用下面的表单添加第一条，或回到清单里直接改单价（会自动记下当天）</span></div>';
+  }
+  // 同步明细表里的环比列（不重绘输入框，避免打断输入）
+  var h = histOf(it);
+  for(var i = 1; i < h.length; i++){
+    var cell = document.querySelector('[data-rdelta="' + i + '"]');
+    if(!cell) continue;
+    var d = num(h[i].price) - num(h[i-1].price);
+    cell.className = "rec-delta " + (d === 0 ? "flat" : (d > 0 ? "up" : "down"));
+    cell.textContent = d === 0 ? "0" : ((d > 0 ? "+" : "−") + money(Math.abs(d)));
+  }
+}
+
+function renderModal(full){
+  var it = findItem(modalItemId);
+  if(!it){ closeTrendModal(); return; }
+  document.getElementById("mTitle").textContent = it.name || "未命名硬件";
+  var sub = [];
+  if(it.brand) sub.push(it.brand);
+  if(it.model) sub.push(it.model);
+  var subTxt = esc(sub.join(" · ") || "—");
+  var priced = String(it.price).trim() === "" ? "未填" : money(num(it.price));
+  var linkHtml = it.link ? '　<a href="' + esc(normalizeLink(it.link)) + '" target="_blank" rel="noopener" style="color:var(--primary)">商品链接 ↗</a>' : "";
+  document.getElementById("mSub").innerHTML = subTxt + '　当前单价 ' + priced + linkHtml;
+  refreshModalDerived();
+  if(full !== false) renderRecList();
+}
+
+function openTrendModal(id){
+  var it = findItem(id);
+  if(!it) return;
+  modalItemId = id;
+  var rd = document.getElementById("recDate");
+  if(!rd.value) rd.value = todayISO();
+  document.getElementById("recPrice").value = "";
+  document.getElementById("recNote").value = "";
+  renderModal(true);
+  document.getElementById("modal").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeTrendModal(){
+  document.getElementById("modal").hidden = true;
+  modalItemId = null;
+  document.body.style.overflow = "";
+  renderTotalChart();
+}
+
+function initModal(){
+  var modal = document.getElementById("modal");
+
+  modal.addEventListener("click", function(e){
+    if(e.target && e.target.hasAttribute && e.target.hasAttribute("data-close")){ closeTrendModal(); return; }
+    var btn = e.target.closest ? e.target.closest("[data-act]") : null;
+    if(!btn) return;
+    if(btn.getAttribute("data-act") !== "recdel") return;
+    var it = findItem(modalItemId);
+    if(!it) return;
+    var h = histOf(it);
+    var rec = h[parseInt(btn.getAttribute("data-ri"), 10)];
+    if(!rec) return;
+    if(!confirm("删除 " + fmtDateCN(rec.date) + " 的记录（" + money(num(rec.price)) + "）？")) return;
+    it.history = (it.history || []).filter(function(x){ return x !== rec; });
+    afterHistoryChange();
+    renderModal(true);
+    toast("已删除该条记录");
+  });
+
+  var list = document.getElementById("recList");
+
+  list.addEventListener("input", function(e){
+    var el = e.target;
+    var ri = el.getAttribute("data-ri"), rf = el.getAttribute("data-rf");
+    if(ri === null || !rf) return;
+    var it = findItem(modalItemId);
+    if(!it) return;
+    var rec = histOf(it)[parseInt(ri, 10)];
+    if(!rec) return;
+
+    if(rf === "price"){
+      var v = el.value.replace(/[^0-9.]/g, "");
+      var parts = v.split(".");
+      if(parts.length > 2) v = parts[0] + "." + parts.slice(1).join("");
+      if(v !== el.value) el.value = v;
+      rec.price = v;
+      refreshModalDerived();
+      afterHistoryChange(true);
+    }else if(rf === "note"){
+      rec.note = el.value;
+      afterHistoryChange(true);
+    }
+  });
+
+  list.addEventListener("change", function(e){
+    var el = e.target;
+    if(el.getAttribute("data-rf") !== "date") return;
+    var it = findItem(modalItemId);
+    if(!it) return;
+    var rec = histOf(it)[parseInt(el.getAttribute("data-ri"), 10)];
+    if(!rec) return;
+    var nd = el.value;
+    if(!nd || nd === rec.date) return;
+
+    var dup = null;
+    for(var i = 0; i < (it.history || []).length; i++){
+      if(it.history[i] !== rec && it.history[i].date === nd){ dup = it.history[i]; break; }
+    }
+    if(dup){
+      if(!confirm(fmtDateCN(nd) + " 已有一条记录（" + money(num(dup.price)) + "），用这条覆盖它？")){ renderModal(true); return; }
+      it.history = it.history.filter(function(x){ return x !== dup; });
+    }
+    rec.date = nd;
+    it.history.sort(byDate);
+    afterHistoryChange();
+    renderModal(true);
+    toast("日期已改为 " + fmtDateCN(nd));
+  });
+
+  document.getElementById("recAdd").addEventListener("click", function(){
+    var it = findItem(modalItemId);
+    if(!it) return;
+    var d = document.getElementById("recDate").value || todayISO();
+    var p = document.getElementById("recPrice").value.replace(/[^0-9.]/g, "");
+    var note = document.getElementById("recNote").value.trim();
+    if(p === ""){ toast("先填一个单价再添加"); document.getElementById("recPrice").focus(); return; }
+    var existed = null;
+    var hh = it.history || [];
+    for(var i = 0; i < hh.length; i++){ if(hh[i].date === d) existed = hh[i]; }
+    if(existed && !confirm(fmtDateCN(d) + " 已有记录（" + money(num(existed.price)) + "），覆盖为 " + money(num(p)) + "？")) return;
+    upsertHistory(it, d, p, note);
+    document.getElementById("recPrice").value = "";
+    document.getElementById("recNote").value = "";
+    afterHistoryChange();
+    renderModal(true);
+    toast("已记录 " + fmtDateCN(d) + "：" + money(num(p)));
+  });
+
+  document.getElementById("recClear").addEventListener("click", function(){
+    var it = findItem(modalItemId);
+    if(!it) return;
+    if(!(it.history || []).length){ toast("本来就没有记录"); return; }
+    if(!confirm("清空「" + (it.name || "该硬件") + "」的全部 " + it.history.length + " 条价格记录？此操作不可撤销。")) return;
+    it.history = [];
+    afterHistoryChange();
+    renderModal(true);
+    toast("已清空该产品的价格记录");
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && !document.getElementById("modal").hidden) closeTrendModal();
+  });
+}
+
+function initSnap(){
+  var di = document.getElementById("snapDate");
+  di.value = todayISO();
+  document.getElementById("btnSnap").addEventListener("click", function(){
+    var d = di.value || todayISO();
+    var n = 0, skipped = 0, existed = 0;
+    for(var i = 0; i < items.length; i++){
+      if(String(items[i].price || "").trim() === ""){ skipped++; continue; }
+      var h = items[i].history || [];
+      for(var j = 0; j < h.length; j++){ if(h[j].date === d){ existed++; break; } }
+    }
+    if(existed && !confirm(fmtDateCN(d) + " 已有 " + existed + " 项价格记录，确认用当前清单里的单价覆盖？")) return;
+    for(var k = 0; k < items.length; k++){
+      if(String(items[k].price || "").trim() === "") continue;
+      upsertHistory(items[k], d, items[k].price, "");
+      n++;
+    }
+    if(!n){ toast("清单里还没有任何单价，先填价格再来记录"); return; }
+    refreshAllTrendCells();
+    renderTotalChart();
+    save(true);
+    toast("已按 " + fmtDateCN(d) + " 记录 " + n + " 项" + (skipped ? "，" + skipped + " 项未填单价已跳过" : ""));
+  });
+}
+
+/* ---------------- 启动 ---------------- */
+load();
+initAutoRec();
+initSnap();
+initModal();
+render();
+
+})();
+</script>
+</body>
+</html>

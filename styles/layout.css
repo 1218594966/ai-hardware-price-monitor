@@ -1,0 +1,95 @@
+/* =========================================================
+   layout.css — 应用外壳：iOS 毛玻璃导航栏 + 分组列表侧栏 + 主区
+   ========================================================= */
+
+/* ---------- 顶部应用栏（iOS 毛玻璃导航栏） ---------- */
+.appbar{
+  flex:none;
+  height:58px;
+  background:rgba(250,250,252,0.72);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:0.5px solid rgba(60,60,67,0.2);
+  display:flex;align-items:center;gap:12px;padding:0 18px;
+  position:relative;z-index:20;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{
+  width:30px;height:30px;border-radius:8px;flex:none;
+  background:linear-gradient(140deg,#0A84FF,#007AFF 58%,#5AC8FA);
+  box-shadow:0 2px 8px rgba(0,122,255,.35);position:relative;
+}
+.brand-mark::after{
+  content:"";position:absolute;inset:8px 8px 14px 8px;border-radius:2px 2px 0 0;background:rgba(255,255,255,.95);
+}
+.brand-mark::before{
+  content:"";position:absolute;left:8px;right:8px;bottom:8px;height:7px;border-radius:0 0 2px 2px;
+  background:rgba(255,255,255,.55);
+}
+.brand-txt b{display:block;font-size:14.5px;font-weight:700;letter-spacing:.1px;line-height:1.2;}
+.brand-txt span{display:block;font-size:11.5px;color:var(--ink-3);line-height:1.3;font-weight:500;}
+.appbar .grow{flex:1;}
+
+/* ---------- 主体骨架 ---------- */
+.shell{flex:1;display:flex;min-height:0;}
+
+/* ---------- 侧栏：报价单列表（iOS 分组列表风） ---------- */
+.sidebar{
+  flex:none;width:292px;background:rgba(255,255,255,.5);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border-right:0.5px solid rgba(60,60,67,0.16);
+  display:flex;flex-direction:column;min-height:0;
+}
+.side-head{
+  flex:none;padding:16px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.side-head h2{
+  margin:0;font-size:12px;font-weight:700;letter-spacing:1.4px;color:var(--ink-3);text-transform:uppercase;
+}
+.q-list{
+  flex:1;overflow-y:auto;padding:2px 14px 16px;display:flex;flex-direction:column;gap:7px;
+}
+.q-item{
+  border:0.5px solid var(--line);border-radius:var(--r-lg);padding:11px 13px;cursor:pointer;
+  background:var(--surface);
+  box-shadow:var(--sh-1);
+  transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;position:relative;
+}
+.q-item:hover{border-color:var(--brand-line);transform:translateY(-1px);box-shadow:var(--sh-2);}
+.q-item.active{background:var(--brand-soft);border-color:var(--brand-line);}
+.q-item.active::before{
+  content:"";position:absolute;left:-14px;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--brand);
+  box-shadow:0 0 10px rgba(0,122,255,.7);
+}
+.q-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.q-name{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.q-total{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--brand);flex:none;}
+.q-sub{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:5px;}
+.q-meta{font-size:11.5px;color:var(--ink-3);}
+.q-spark{flex:none;display:flex;align-items:center;gap:5px;}
+.q-spark svg{display:block;width:56px;height:20px;}
+.q-nohist{font-size:10.5px;color:var(--ink-4);}
+.side-foot{
+  flex:none;padding:11px 18px 16px;border-top:0.5px solid rgba(60,60,67,0.14);
+  font-size:11.5px;color:var(--ink-3);line-height:1.7;
+}
+
+/* ---------- 主区（iOS 分组背景） ---------- */
+.main{flex:1;min-width:0;overflow-y:auto;}
+.main-inner{padding:22px 26px 70px;max-width:1560px;}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1240px){
+  .kpis{grid-template-columns:1fr 1fr;}
+  .sidebar{width:254px;}
+}
+@media (max-width:880px){
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:0.5px solid rgba(60,60,67,0.16);max-height:196px;background:var(--surface);}
+  .q-list{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:0 14px 14px;}
+  .q-item{min-width:224px;flex:none;}
+  .q-item.active::before{left:-14px;top:auto;bottom:-14px;width:auto;height:4px;border-radius:4px 4px 0 0;}
+  .main-inner{padding:16px 16px 60px;}
+  .q-title{font-size:21px;}
+  .kpis{grid-template-columns:1fr;}
+}

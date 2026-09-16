@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2F2F7">
+<title>报价单管理 · AI 一体机价格监控</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<!-- ================= 顶部应用栏（iOS 毛玻璃导航栏） ================= -->
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-txt">
+      <b>报价单管理</b>
+      <span>AI 一体机 · 硬件价格监控</span>
+    </div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn sm" id="btnImport" title="从 JSON 文件恢复报价单（会覆盖本机数据）">导入 JSON</button>
+  <button class="btn sm" id="btnExport" title="把全部报价单导出为 JSON 文件备份">导出 JSON</button>
+</header>
+
+<div class="shell">
+  <!-- ================= 侧栏：报价单列表 ================= -->
+  <aside class="sidebar">
+    <div class="side-head">
+      <h2>报价单</h2>
+      <button class="btn sm" id="btnNewQuote" title="新建一张空白报价单">＋ 新建</button>
+    </div>
+    <div class="q-list" id="qList"></div>
+    <div class="side-foot">
+      共 <b id="qCount">0</b> 张报价单 · 数据自动保存在本机
+    </div>
+  </aside>
+
+  <!-- ================= 主区 ================= -->
+  <main class="main">
+    <div class="main-inner" id="mainInner"></div>
+  </main>
+</div>
+
+<!-- ================= 弹窗：单品价格走势明细 ================= -->
+<div class="mask" id="itemMask" hidden>
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h3 id="mTitle"></h3>
+        <div class="sub" id="mSub"></div>
+      </div>
+      <button class="btn icon" data-close title="关闭">✕</button>
+    </div>
+    <div class="panel-body">
+      <div class="mstats" id="mStats"></div>
+      <div class="mchart" id="mChart"></div>
+
+      <div class="msec">添加价格记录<span class="n">日期可选过去的，用来补录历史报价</span></div>
+      <div class="form-grid">
+        <input type="date" id="recDate">
+        <input type="text" id="recPrice" inputmode="decimal" placeholder="单价 ¥">
+        <input type="text" id="recNote" placeholder="备注（可选），如：京东自营 / 含税报价">
+        <button class="btn primary" id="recAdd">添加</button>
+      </div>
+
+      <div class="msec">全部记录<span class="n" id="recCount"></span><div class="grow"></div>
+        <button class="btn sm danger" id="recClear" title="清空该硬件的全部价格记录">清空</button>
+      </div>
+      <div id="recList"></div>
+
+      <div class="panel-foot">
+        <button class="btn" data-close>关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 弹窗：报价条款 ================= -->
+<div class="mask" id="termsMask" hidden>
+  <div class="panel narrow">
+    <div class="panel-head">
+      <div>
+        <h3>报价条款</h3>
+        <div class="sub" id="termsSub"></div>
+      </div>
+      <button class="btn icon" data-close title="关闭">✕</button>
+    </div>
+    <div class="panel-body">
+      <div id="termsTable"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+        <button class="btn primary" data-act="termadd">＋ 添加一条条款</button>
+        <button class="btn" data-act="termreset">恢复默认条款</button>
+        <div class="grow"></div>
+        <button class="btn" data-close>完成</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 打印用报价单文档（屏幕上隐藏） ================= -->
+<div class="quote-doc" id="quoteDoc"></div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileImport" accept=".json,application/json" hidden>
+
+<!-- ================= 启动失败兜底 ================= -->
+<div id="bootError" hidden>
+  <div>
+    <b>页面没能正常启动</b>
+    请确认构建产物完整：<code>dist/assets/app.js</code>、<code>dist/assets/app.css</code> 与
+    <code>dist/index.html</code> 在同一层目录里（运行 <code>npm run build</code> 重新生成，或整个 dist 文件夹一起拷贝）。<br>
+    用 Chrome / Edge 直接双击打开 index.html 即可，无需联网、无需服务器。
+  </div>
+</div>
+
+<!-- ================= 构建产物（由 scripts/build.mjs 生成） ================= -->
+<script src="assets/app.js"></script>
+
+</body>
+</html>
