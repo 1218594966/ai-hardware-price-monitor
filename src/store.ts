@@ -540,6 +540,33 @@ function countOnDate(quoteId: string, date: string): number {
   return n;
 }
 
+/* ---------------- 一键复制某日价格 ---------------- */
+
+/** 目标日之前、最近一个有价格记录的日子（没有则返回 null） */
+function prevPriceDate(quoteId: string, targetDate: string): string | null {
+  const q = get(quoteId);
+  if (!q) return null;
+  const dates = allDates(q).filter((d) => d < targetDate);
+  return dates.length ? dates[dates.length - 1] : null;
+}
+
+/** 把 sourceDate 当天已记录的价格复制一份到 targetDate；返回写入条数。
+ *  只复制「在 sourceDate 当天或之前有历史价」的项，没记录过的项不写。 */
+function copyDate(quoteId: string, targetDate: string, sourceDate: string): number {
+  const q = get(quoteId);
+  if (!q) return 0;
+  let n = 0;
+  for (const it of q.items) {
+    const h = histOf(it);
+    if (!h.length || h[0].date > sourceDate) continue; // 该日及之前没有它的价格
+    const price = priceAsOf(it, sourceDate);
+    upsertHistory(it, targetDate, String(price), "");
+    n++;
+  }
+  if (n) save(true);
+  return n;
+}
+
 function setTrendMode(m: string): void {
   state.trendMode = m === "unit" ? "unit" : "total";
   savePrefs();
@@ -577,6 +604,8 @@ export const store = {
   statsOf,
   snapshotAll,
   countOnDate,
+  prevPriceDate,
+  copyDate,
   setTrendMode
 };
 

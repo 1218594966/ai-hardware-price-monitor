@@ -854,3 +854,50 @@ describe("13. 首次运行默认报价单", () => {
     ok(p.$("#btnNewQuote") !== null, "侧栏顶部有「＋ 新建」");
   });
 });
+
+/* =========================================================
+   14. 一键复制某日价格
+   ========================================================= */
+describe("14. 一键复制某日价格", () => {
+  it("把上一价格日的价格复制到目标日", () => {
+    const p = boot();
+    const w = p.w;
+
+    const q = S.create("复制测试");
+    S.setActive(q.id);
+    S.addItem(q.id, { name: "A", qty: "1", unit: "个", price: "100" });
+    S.addItem(q.id, { name: "B", qty: "1", unit: "个", price: "200" });
+    S.addItem(q.id, { name: "C", qty: "1", unit: "个", price: "" }); // 没单价，不该被复制
+    S.addItem(q.id, { name: "D", qty: "1", unit: "个", price: "300" });
+    app.renderAll();
+
+    /* 先建 9.16 基线（只有有单价的 3 项） */
+    S.snapshotAll(q.id, "2026-09-16");
+    eq(S.countOnDate(q.id, "2026-09-16"), 3, "9.16 基线记录 3 项（C 无单价被跳过）");
+
+    /* 目标日 9.17：一键复制上一日 */
+    (p.$("#snapDate") as HTMLInputElement).value = "2026-09-17";
+    click(w, p.btn("#qActions", "copy"));
+    eq(S.countOnDate(q.id, "2026-09-17"), 3, "9.17 复制到 3 项");
+    eq(S.histOf(q.items[0]).filter((h) => h.date === "2026-09-17")[0].price, "100", "A 的 9.17 = 9.16 价格 100");
+    eq(S.histOf(q.items[1]).filter((h) => h.date === "2026-09-17")[0].price, "200", "B 的 9.17 = 9.16 价格 200");
+    eq(S.allDates(q).length, 2, "报价单有两个记录日（9.16 + 9.17）");
+    near(S.seriesOf(q, "total")[1].price, 600, "9.17 总价 = 100 + 200 + 300");
+
+    /* 目标日已有记录：复制会覆盖（confirm 桩返回 true） */
+    S.upsertHistory(q.items[0], "2026-09-18", "111", "");
+    (p.$("#snapDate") as HTMLInputElement).value = "2026-09-18";
+    click(w, p.btn("#qActions", "copy"));
+    eq(S.histOf(q.items[0]).filter((h) => h.date === "2026-09-18")[0].price, "100", "9.18 被 9.17 的价格覆盖为 100");
+
+    /* 目标日之前没有记录日：不写入 */
+    const q2 = S.create("无源日期");
+    S.setActive(q2.id);
+    S.addItem(q2.id, { name: "X", qty: "1", unit: "个", price: "50" });
+    app.renderAll();
+    (p.$("#snapDate") as HTMLInputElement).value = "2026-09-10";
+    click(w, p.btn("#qActions", "copy"));
+    eq(S.countOnDate(q2.id, "2026-09-10"), 0, "历史最早的记录日之前无法复制（不会写入）");
+    eq(S.prevPriceDate(q2.id, "2026-09-10"), null, "没有更早的价格日时 prevPriceDate 返回 null");
+  });
+});

@@ -72,6 +72,7 @@ function html(): string {
     '<button class="btn primary" data-act="add">＋ 添加硬件</button>' +
     '<input type="date" class="sel-date" id="snapDate2" value="' + U.todayISO() + '">' +
     '<button class="btn" data-act="snap">记录该日价格</button>' +
+    '<button class="btn" data-act="copy" title="把最近一个有价格记录的日子（如 9.16）的价格，一键复制到左边选中的日期（如 9.17）">复制上一日价格</button>' +
     '<label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录">' +
     '<input type="checkbox" id="autoRec" checked> 自动记价</label>' +
     '<button class="btn" data-act="done">完成，返回看板</button>' +
@@ -197,6 +198,18 @@ function bind(): void {
         U.toast("已添加，直接输入名称");
       } else if (act === "done") {
         getApp().setMode("dashboard");
+      } else if (act === "copy") {
+        const d = (document.getElementById("snapDate2") as HTMLInputElement).value || U.todayISO();
+        const src = S.prevPriceDate(q.id, d);
+        if (!src) {
+          U.toast(U.fmtDateCN(d) + " 之前还没有价格记录日，无法复制 —— 可先用「记录该日价格」建个基线");
+          return;
+        }
+        const existed = S.countOnDate(q.id, d);
+        if (existed && !confirm(U.fmtDateCN(d) + " 已有 " + existed + " 项记录，用 " + U.fmtDateCN(src) + " 的价格覆盖？")) return;
+        const n = S.copyDate(q.id, d, src);
+        renderSheet();
+        U.toast("已把 " + U.fmtDateCN(src) + " 的 " + n + " 项价格复制到 " + U.fmtDateCN(d) + "（没记录过的项跳过）");
       } else if (act === "snap") {
         const d = (document.getElementById("snapDate2") as HTMLInputElement).value || U.todayISO();
         const st = S.statsOf(q);

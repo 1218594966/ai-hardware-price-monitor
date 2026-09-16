@@ -161,6 +161,7 @@ function html(): string {
     '<div class="q-actions" id="qActions">' +
     '<input type="date" class="sel-date" id="snapDate" value="' + U.todayISO() + '">' +
     '<button class="btn" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button>' +
+    '<button class="btn" data-act="copy" title="把最近一个有价格记录的日子（如 9.16）的价格，一键复制到左边选中的日期（如 9.17）">复制上一日价格</button>' +
     '<button class="btn" data-act="terms" title="编辑这张报价单的条款">报价条款</button>' +
     '<button class="btn" data-act="dup" title="复制一份当前配置">复制</button>' +
     '<button class="btn primary" data-act="edit">编辑清单</button>' +
@@ -245,6 +246,18 @@ function bind(): void {
         S.remove(q.id);
         app.renderAll();
         U.toast("已删除报价单");
+      } else if (act === "copy") {
+        const d = (document.getElementById("snapDate") as HTMLInputElement).value || U.todayISO();
+        const src = S.prevPriceDate(q.id, d);
+        if (!src) {
+          U.toast(U.fmtDateCN(d) + " 之前还没有价格记录日，无法复制 —— 可先用「记录该日价格」建个基线");
+          return;
+        }
+        const existed = S.countOnDate(q.id, d);
+        if (existed && !confirm(U.fmtDateCN(d) + " 已有 " + existed + " 项记录，用 " + U.fmtDateCN(src) + " 的价格覆盖？")) return;
+        const n = S.copyDate(q.id, d, src);
+        app.renderAll();
+        U.toast("已把 " + U.fmtDateCN(src) + " 的 " + n + " 项价格复制到 " + U.fmtDateCN(d) + "（没记录过的项跳过）");
       } else if (act === "snap") {
         const d = (document.getElementById("snapDate") as HTMLInputElement).value || U.todayISO();
         const st = S.statsOf(q);

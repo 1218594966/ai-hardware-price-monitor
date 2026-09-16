@@ -66,6 +66,7 @@ ok(/¥/.test($(".kpi.hero .v").textContent), "总价 KPI 显示金额");
 ok($$(".hw-card").length >= 10, "默认报价单带示例硬件卡片（含价格）");
 ok($$(".hw-spark svg").length >= 1, "示例历史价渲染出迷你走势");
 ok($("#segTrend") !== null, "走势口径分段控件存在");
+ok($('#qActions [data-act="copy"]') !== null, "看板含「复制上一日价格」按钮");
 ok($("#bootError") && $("#bootError").hidden, "启动兜底提示未弹出");
 ok(w.document.title.includes("AI 一体机价格监控"), "document.title 正确");
 
