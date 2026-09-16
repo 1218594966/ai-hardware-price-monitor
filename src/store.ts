@@ -3,7 +3,7 @@
    对应旧版 assets/js/store.js
    ========================================================= */
 import { uid, byDate, num, todayISO, pad2, toast, hasVal } from "./util";
-import { buildSeedQuotations, SEED_QUOTATIONS, SEED_DATES, PREV_SEED_SPECS } from "./seed";
+import { buildSeedQuotations, SEED_QUOTATIONS, SEED_DATES, PREV_SEED_SPECS, PREV_SEED_LINKS } from "./seed";
 import type { Quotation, QuotationItem, PriceRecord, Term, TrendMode, SeriesPoint, Stats, Delta, TrendInfo } from "./types";
 
 const KEY = "ai-quote-v1";          // 新版数据结构
@@ -157,6 +157,11 @@ function isPristineSeed(mapped: Quotation[]): boolean {
       /* 基本参数：允许等于新版、等于上一版（仅 3 项有说明）、或为空 —— 都视为未改动的默认数据 */
       const prevSpec = PREV_SEED_SPECS[ri.name];
       if (it.spec !== (ri.spec || "") && it.spec !== (prevSpec || "") && it.spec !== "") {
+        return false;
+      }
+      /* 商品链接：允许等于新版、等于上一版的 2 条、或为空 —— 都不算用户改动 */
+      const prevLink = PREV_SEED_LINKS[ri.name];
+      if (it.link !== (ri.link || "") && it.link !== (prevLink || "") && it.link !== "") {
         return false;
       }
       /* 历史价：日期必须是默认数据用过的日期，价格必须是该条目的已知种子价

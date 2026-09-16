@@ -850,6 +850,8 @@ describe("13. 首次运行默认报价单", () => {
     eq(S.all()[0].docNo.indexOf("Q-"), 0, "自动生成报价单编号");
     ok(S.all()[0].items.length > 0, "默认报价单带示例硬件清单");
     ok(S.histOf(S.all()[0].items[0]).length > 0, "默认报价单带历史价格走势");
+    ok(S.all()[0].items.filter((it) => it.link).length >= 10, "默认清单 10 条以上带商品链接");
+    eq(S.all()[0].items.find((it) => it.name === "大模型显卡")?.link, "https://item.jd.com/100251181311.html", "大模型显卡链接正确");
     ok(p.$("#btnExport") !== null && p.$("#btnImport") !== null, "顶栏保留 JSON 导入导出");
     ok(p.$("#btnNewQuote") !== null, "侧栏顶部有「＋ 新建」");
   });

@@ -16,6 +16,12 @@ export const PREV_SEED_SPECS: Record<string, string> = {
   MaxKB授权: "知识库问答系统授权。"
 };
 
+/** 上一版默认清单里仅有的 2 条商品链接（用于识别「未改动的旧默认数据」并自动升级） */
+export const PREV_SEED_LINKS: Record<string, string> = {
+  大模型显卡: "https://item.jd.com/100012043978.html",
+  数字孪生显卡: "https://item.jd.com/100019688076.html"
+};
+
 interface SeedItemInput {
   name: string;
   brand?: string;
@@ -42,19 +48,19 @@ export const SEED_QUOTATIONS: SeedQuotationInput[] = [
     note: "桌面静音型边缘节点 · 大模型推理 + 数字孪生",
     createdAt: "2026-06-16",
     items: [
-      { name: "大模型显卡", brand: "NVIDIA", model: "RTX 5090 32GB", qty: 1, unit: "张", price: 62509, spec: "物理显存不低于32GB，支撑本地大模型推理与长上下文计算。", hist: [64800, 63900, 63100, 62509], link: "https://item.jd.com/100012043978.html" },
-      { name: "数字孪生显卡", brand: "七彩虹", model: "RTX5070 Ultra W OC 16G", qty: 1, unit: "张", price: 11299, spec: "物理显存不低于16GB，承担视觉识别管线（YOLO/OCR）与三维渲染并发负载。视觉管线按需加载预估显存≤12GB，UE孪生渲染预估≤4GB，合计≤16GB。", hist: [11800, 11500, 11400, 11299], link: "https://item.jd.com/100019688076.html" },
-      { name: "CPU散热", brand: "利民", model: "420mm 一体式水冷", qty: 1, unit: "式", price: 639, spec: "满足桌面静音型边缘节点连续运行散热要求。", hist: [639, 649, 645, 639] },
-      { name: "CPU", brand: "Intel", model: "Core Ultra 9 285K", qty: 1, unit: "颗", price: 3699, spec: "支撑容器编排、业务服务调度与多进程并发。", hist: [3999, 3899, 3799, 3699] },
-      { name: "主板", brand: "华硕", model: "ROG STRIX Z890-A", qty: 1, unit: "块", price: 2699, spec: "Z890 平台，满足高带宽存储、显卡与外设扩展需求。", hist: [2699, 2750, 2720, 2699] },
-      { name: "内存", brand: "十铨", model: "DDR5 96GB（48GB×2）6400MHz+", qty: 1, unit: "组", price: 11999, spec: "满足本地模型、RAG、数据库与数字孪生并发运行。", hist: [8999, 10500, 11800, 11999] },
-      { name: "系统硬盘", brand: "三星", model: "9100 Pro 2TB PCIe 5.0 NVMe ×2", qty: 2, unit: "组", price: 2999, spec: "作为系统盘、模型盘与高速权重加载介质。", hist: [3199, 3099, 3050, 2999] },
-      { name: "存储硬盘", brand: "希捷", model: "4TB 企业级机械硬盘", qty: 2, unit: "块", price: 1600, spec: "用于日志、时序数据与本地备份数据持久化。", hist: [1600, 1600, 1600, 1600] },
-      { name: "电源", brand: "", model: "1500W ATX 3.1 金牌全模组", qty: 1, unit: "式", price: 800, spec: "满足高功耗显卡与满载运行供电冗余。", hist: [899, 850, 820, 800] },
-      { name: "显示器", brand: "AOC", model: "27 英寸 120Hz", qty: 1, unit: "台", price: 749, spec: "用于本地数字孪生大屏、运维工作台与调试显示。", hist: [799, 780, 760, 749] },
-      { name: "键鼠套装", brand: "罗技", model: "MK106", qty: 1, unit: "式", price: 69, spec: "用于现场基础运维与调试输入。", hist: [69, 69, 69, 69] },
-      { name: "机箱", brand: "Fractal Design", model: "Define 7 XL 全塔机箱", qty: 1, unit: "台", price: 1749, spec: "全塔静音机箱，满足桌面部署、风道与扩展空间要求。", hist: [1799, 1799, 1770, 1749] },
-      { name: "UPS电源", brand: "山特", model: "C6K 6KVA/5.4KW 内置电池一体机", qty: 1, unit: "式", price: 6588, spec: "提供市电异常缓冲、数据落盘与安全关机保障。", hist: [5888, 6188, 6400, 6588] },
+      { name: "大模型显卡", brand: "NVIDIA", model: "RTX 5090 32GB", qty: 1, unit: "张", price: 62509, spec: "物理显存不低于32GB，支撑本地大模型推理与长上下文计算。", hist: [64800, 63900, 63100, 62509], link: "https://item.jd.com/100251181311.html" },
+      { name: "数字孪生显卡", brand: "七彩虹", model: "RTX5070 Ultra W OC 16G", qty: 1, unit: "张", price: 11299, spec: "物理显存不低于16GB，承担视觉识别管线（YOLO/OCR）与三维渲染并发负载。视觉管线按需加载预估显存≤12GB，UE孪生渲染预估≤4GB，合计≤16GB。", hist: [11800, 11500, 11400, 11299], link: "https://item.jd.com/100201021760.html" },
+      { name: "CPU散热", brand: "利民", model: "420mm 一体式水冷", qty: 1, unit: "式", price: 639, spec: "满足桌面静音型边缘节点连续运行散热要求。", hist: [639, 649, 645, 639], link: "https://item.jd.com/10100710989166.html" },
+      { name: "CPU", brand: "Intel", model: "Core Ultra 9 285K", qty: 1, unit: "颗", price: 3699, spec: "支撑容器编排、业务服务调度与多进程并发。", hist: [3999, 3899, 3799, 3699], link: "https://item.jd.com/100145512952.html" },
+      { name: "主板", brand: "华硕", model: "ROG STRIX Z890-A", qty: 1, unit: "块", price: 2699, spec: "Z890 平台，满足高带宽存储、显卡与外设扩展需求。", hist: [2699, 2750, 2720, 2699], link: "https://item.jd.com/10119942340926.html" },
+      { name: "内存", brand: "十铨", model: "DDR5 96GB（48GB×2）6400MHz+", qty: 1, unit: "组", price: 11999, spec: "满足本地模型、RAG、数据库与数字孪生并发运行。", hist: [8999, 10500, 11800, 11999], link: "https://item.jd.com/10116737419356.html" },
+      { name: "系统硬盘", brand: "三星", model: "9100 Pro 2TB PCIe 5.0 NVMe ×2", qty: 2, unit: "组", price: 2999, spec: "作为系统盘、模型盘与高速权重加载介质。", hist: [3199, 3099, 3050, 2999], link: "https://item.jd.com/100153900833.html" },
+      { name: "存储硬盘", brand: "希捷", model: "4TB 企业级机械硬盘", qty: 2, unit: "块", price: 1600, spec: "用于日志、时序数据与本地备份数据持久化。", hist: [1600, 1600, 1600, 1600], link: "https://item.jd.com/10135476153231.html" },
+      { name: "电源", brand: "", model: "1500W ATX 3.1 金牌全模组", qty: 1, unit: "式", price: 800, spec: "满足高功耗显卡与满载运行供电冗余。", hist: [899, 850, 820, 800], link: "https://item.jd.com/10163248376428.html" },
+      { name: "显示器", brand: "AOC", model: "27 英寸 120Hz", qty: 1, unit: "台", price: 749, spec: "用于本地数字孪生大屏、运维工作台与调试显示。", hist: [799, 780, 760, 749], link: "https://item.jd.com/100107747308.html" },
+      { name: "键鼠套装", brand: "罗技", model: "MK106", qty: 1, unit: "式", price: 69, spec: "用于现场基础运维与调试输入。", hist: [69, 69, 69, 69], link: "https://item.jd.com/100211761507.html" },
+      { name: "机箱", brand: "Fractal Design", model: "Define 7 XL 全塔机箱", qty: 1, unit: "台", price: 1749, spec: "全塔静音机箱，满足桌面部署、风道与扩展空间要求。", hist: [1799, 1799, 1770, 1749], link: "https://item.jd.com/10052609095439.html" },
+      { name: "UPS电源", brand: "山特", model: "C6K 6KVA/5.4KW 内置电池一体机", qty: 1, unit: "式", price: 6588, spec: "提供市电异常缓冲、数据落盘与安全关机保障。", hist: [5888, 6188, 6400, 6588], link: "https://item.jd.com/10583213686.html" },
       { name: "MaxKB授权", brand: "飞致云", model: "企业版", qty: 1, unit: "式", price: 48000, spec: "知识库问答系统授权。", hist: [48000, 48000, 48000, 48000] }
     ]
   },
