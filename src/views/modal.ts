@@ -54,7 +54,7 @@ function renderStats(it: QuotationItem): void {
     stat("最新单价", U.money(t.last)) +
     stat("首次单价", U.money(t.first)) +
     '<div class="mstat"><div class="k">累计变动</div>' + (t.diff === 0
-      ? '<div class="v sm" style="color:var(--ink-3)">持平</div>'
+      ? '<div class="v sm muted">持平</div>'
       : '<div class="v sm ' + t.cls + '">' + sign + U.money(Math.abs(t.diff)) +
         "（" + sign + Math.abs(t.pct).toFixed(2) + "%）</div>") + "</div>" +
     stat("最高", U.money(mx)) +
@@ -89,12 +89,12 @@ function renderRecords(it: QuotationItem): void {
     const txt = d === null ? (h.length > 1 ? "首条" : "—") : d === 0 ? "0" : (d > 0 ? "+" : "−") + U.money(Math.abs(d));
     return (
       "<tr>" +
-      '<td style="width:150px"><input type="date" data-ri="' + i + '" data-rf="date" value="' + U.esc(r.date) + '"></td>' +
-      '<td style="width:132px"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + U.esc(r.price) + '" placeholder="0.00"></td>' +
-      '<td class="rec-delta ' + cls + '" style="width:104px" data-rdelta="' + i + '">' + txt + "</td>" +
+      '<td class="rc-date"><input type="date" data-ri="' + i + '" data-rf="date" value="' + U.esc(r.date) + '"></td>' +
+      '<td class="rc-price"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + U.esc(r.price) + '" placeholder="0.00"></td>' +
+      '<td class="rec-delta ' + cls + '" data-rdelta="' + i + '">' + txt + "</td>" +
       '<td><input data-ri="' + i + '" data-rf="note" value="' + U.esc(r.note) + '" placeholder="备注…"></td>' +
-      '<td style="width:52px;text-align:right">' + (i === h.length - 1 && h.length > 1 ? '<span class="tag">最新</span>' : "") + "</td>" +
-      '<td style="width:44px;text-align:right">' +
+      '<td class="rc-mark">' + (i === h.length - 1 && h.length > 1 ? '<span class="tag">最新</span>' : "") + "</td>" +
+      '<td class="rc-act">' +
       '<button class="mini-btn del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td>' +
       "</tr>"
     );
@@ -102,7 +102,7 @@ function renderRecords(it: QuotationItem): void {
 
   box.innerHTML =
     '<table class="rec-table"><thead><tr>' +
-    "<th>日期</th><th style=\"text-align:right\">单价 ¥</th><th style=\"text-align:right\">环比</th>" +
+    '<th class="rc-date">日期</th><th class="rc-price">单价 ¥</th><th class="rec-delta">环比</th>' +
     "<th>备注</th><th></th><th></th></tr></thead><tbody>" + rows + "</tbody></table>";
 }
 
@@ -120,14 +120,13 @@ function render(): void {
   if (sub) {
     const parts = [it.brand, it.model].filter(Boolean).join(" · ") || "—";
     const link = it.link
-      ? '　<a href="' + U.esc(U.normalizeLink(it.link)) + '" target="_blank" rel="noopener" ' +
-        'style="color:var(--brand);text-decoration:none">商品链接 ↗</a>'
+      ? '　<a class="m-link" href="' + U.esc(U.normalizeLink(it.link)) + '" target="_blank" rel="noopener">商品链接 ↗</a>'
       : "";
     sub.innerHTML =
       U.esc(parts) +
       "　当前单价 " + (String(it.price).trim() === "" ? "未填" : U.money(U.num(it.price))) +
       "　×" + U.esc(it.qty) + " " + U.esc(it.unit) +
-      (q ? '　<span style="color:var(--ink-4)">' + U.esc(q.name) + "</span>" : "") +
+      (q ? '　<span class="m-quiet">' + U.esc(q.name) + "</span>" : "") +
       link;
   }
   renderStats(it);

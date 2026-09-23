@@ -64,18 +64,18 @@ function kpisHTML(q: Quotation, st: Stats, delta: Delta | null): string {
   if (delta) {
     const up = delta.diff > 0;
     deltaHTML =
-      '<div class="v delta ' + (up ? "up" : "down") + '" style="font-size:19px">' +
+      '<div class="v delta ' + (up ? "up" : "down") + '">' +
       (up ? "+" : "−") + U.moneyShort(Math.abs(delta.diff)) +
       "（" + (up ? "+" : "−") + Math.abs(delta.pct).toFixed(2) + "%）</div>";
   } else {
-    deltaHTML = '<div class="v" style="font-size:19px;color:var(--ink-3)">—</div>';
+    deltaHTML = '<div class="v delta muted">—</div>';
   }
 
   return (
     '<div class="kpis">' +
     '<div class="kpi hero"><div class="k">' + heroLabel + "</div>" +
     '<div class="v">' + U.money(hero) + "</div>" +
-    '<div class="foot" style="color:rgba(255,255,255,.85)">' + heroFoot + "</div></div>" +
+    '<div class="foot">' + heroFoot + "</div></div>" +
     '<div class="kpi"><div class="k">硬件项数</div><div class="v">' + st.items + "<small>项</small></div>" +
     '<div class="foot">共 ' + st.qty + " 件 / 套" + (st.missing ? " · " + st.missing + " 项未填价" : "") + "</div></div>" +
     '<div class="kpi"><div class="k">较首日变动</div>' + deltaHTML +
@@ -93,7 +93,8 @@ function trendCardHTML(q: Quotation): string {
   if (!series.length) {
     body = '<div class="chart-empty">还没有价格记录 —— 点右上角「记录该日价格」给今天打个基线</div>';
   } else {
-    body = C.line(series, { width: 1000, height: 262 });
+    /* 只有一个记录日时没有曲线可看，压低图表高度，别让大片空白把硬件卡挤出首屏 */
+    body = C.line(series, { width: 1000, height: series.length === 1 ? 172 : 262 });
     if (series.length === 1) {
       body +=
         '<div class="note">当前只有 <b>1 个记录日</b>（' + U.fmtDateCN(series[0].date) +
@@ -174,23 +175,35 @@ function html(): string {
   return (
     '<div class="q-head">' +
     '<div class="q-head-l">' +
+    '<div class="q-eyebrow"><span class="dot"></span>报价单 · ' + U.esc(q.docNo) + "</div>" +
     '<input class="q-title" id="qTitle" value="' + U.esc(q.name) + '" placeholder="给这张报价单起个名字" ' +
     'maxlength="60" title="点击可直接修改报价单名称">' +
     '<input class="q-note" id="qNote" value="' + U.esc(q.note) + '" placeholder="备注（可选），例如：面向 XX 项目的两台节点" ' +
     'maxlength="120" title="点击可直接修改备注">' +
-    '<p class="q-doc-line">报价单编号 ' + U.esc(q.docNo) + " · 创建于 " + U.fmtDateCN(q.createdAt) +
-    " · " + q.terms.length + " 条报价条款</p>" +
+    '<p class="q-doc-line">创建于 ' + U.fmtDateCN(q.createdAt) + " · " + q.items.length + " 项硬件 · " +
+    q.terms.length + " 条报价条款</p>" +
     "</div>" +
     '<div class="q-actions" id="qActions">' +
+    '<div class="act-main">' +
+    '<button class="btn ghost" data-act="terms" title="编辑这张报价单的条款">报价条款</button>' +
+    '<button class="btn ghost" data-act="dup" title="复制一份当前配置">复制</button>' +
+    '<button class="btn ghost danger" data-act="del">删除</button>' +
+    '<button class="btn" data-act="edit">编辑清单</button>' +
+    '<button class="btn primary" data-act="quote">生成报价单</button>' +
+    "</div>" +
+    '<div class="act-bar">' +
+    '<div class="bar-group"><span class="bar-label">记录日</span>' +
     '<input type="date" class="sel-date" id="snapDate" value="' + U.todayISO() + '">' +
-    '<button class="btn" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button>' +
+    '<button class="btn sm" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button>' +
+    "</div>" +
+    '<span class="bar-sep"></span>' +
+    '<div class="bar-group"><span class="bar-label">来源</span>' +
     copySrcHTML(q) +
-    '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button>' +
-    '<button class="btn" data-act="terms" title="编辑这张报价单的条款">报价条款</button>' +
-    '<button class="btn" data-act="dup" title="复制一份当前配置">复制</button>' +
-    '<button class="btn primary" data-act="edit">编辑清单</button>' +
-    '<button class="btn soft" data-act="quote">生成报价单</button>' +
-    '<button class="btn danger" data-act="del">删除</button>' +
+    '<button class="btn sm" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button>' +
+    "</div>" +
+    '<span class="bar-spacer"></span>' +
+    '<span class="bar-hint">记一次价，走势图才有数据</span>' +
+    "</div>" +
     "</div>" +
     "</div>" +
     kpisHTML(q, st, delta) +

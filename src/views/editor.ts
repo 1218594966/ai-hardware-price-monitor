@@ -36,10 +36,10 @@ function rowHTML(it: QuotationItem, idx: number, len: number): string {
   const sub = U.num(it.qty) * U.num(it.price);
   const t = S.trendOf(it);
   const cell = t
-    ? C.spark(t.h, { width: 104, height: 26, pad: 3 })
+    ? C.spark(t.h, { width: 80, height: 24, pad: 3 })
     : '<span class="no-hist">暂无记录</span>';
   const badge = t && t.h.length >= 2
-    ? '<span class="badge ' + t.cls + '" style="font-size:10.5px;padding:1px 5px">' +
+    ? '<span class="badge xs ' + t.cls + '">' +
       (t.diff > 0 ? "↑" : t.diff < 0 ? "↓" : "—") + Math.abs(t.pct).toFixed(1) + "%</span>"
     : "";
 
@@ -49,7 +49,8 @@ function rowHTML(it: QuotationItem, idx: number, len: number): string {
     '<td><input class="cell" data-f="name" value="' + U.esc(it.name) + '" placeholder="产品名称"></td>' +
     '<td><input class="cell" data-f="brand" value="' + U.esc(it.brand) + '" placeholder="品牌"></td>' +
     '<td><input class="cell" data-f="model" value="' + U.esc(it.model) + '" placeholder="型号"></td>' +
-    '<td><textarea class="cell" rows="1" data-f="spec" placeholder="基本参数 / 说明">' + U.esc(it.spec) + "</textarea></td>" +
+    '<td><textarea class="cell" rows="1" data-f="spec" placeholder="基本参数 / 说明"' +
+    (it.spec.length > 34 ? ' title="' + U.esc(it.spec) + '"' : "") + ">" + U.esc(it.spec) + "</textarea></td>" +
     '<td><div class="qty-box">' +
     '<input class="cell num q" data-f="qty" value="' + U.esc(it.qty) + '" placeholder="1">' +
     '<input class="cell u" data-f="unit" value="' + U.esc(it.unit) + '" placeholder="个">' +
@@ -58,9 +59,9 @@ function rowHTML(it: QuotationItem, idx: number, len: number): string {
     U.esc(it.price) + '" placeholder="0.00" title="手动输入单价" inputmode="decimal"></td>' +
     '<td class="sub-cell' + (sub > 0 ? "" : " zero") + '" data-sub="' + it.id + '">' +
     (sub > 0 ? U.money(sub) : "—") + "</td>" +
-    '<td><div class="nd" data-act="trend" data-id="' + it.id + '" title="点击查看价格明细" style="cursor:pointer">' +
+    '<td><div class="nd" data-act="trend" data-id="' + it.id + '" title="点击查看价格明细">' +
     cell + badge + "</div></td>" +
-    '<td><div class="nd">' +
+    '<td><div class="nd link-box">' +
     '<input class="cell" data-f="link" value="' + U.esc(it.link) + '" placeholder="粘贴商品链接…">' +
     '<button class="mini-btn" data-act="open" title="打开商品链接">↗</button>' +
     "</div></td>" +
@@ -79,34 +80,44 @@ function html(): string {
   return (
     '<div class="q-head">' +
     '<div class="q-head-l">' +
+    '<div class="q-eyebrow"><span class="dot"></span>编辑清单 · ' + U.esc(q.docNo) + "</div>" +
     '<input class="q-title" id="eqTitle" value="' + U.esc(q.name) + '" placeholder="报价单名称" maxlength="60">' +
-    '<p class="q-doc-line">编辑清单 · 直接点单元格修改 · 单价留空按 0 计算 · ' +
-    "改完单价离开输入框会自动为当天留一条价格记录</p>" +
+    '<p class="q-doc-line">直接点单元格修改 · 单价留空按 0 计算 · 改完单价离开输入框会自动为当天留一条价格记录</p>' +
     "</div>" +
     '<div class="q-actions">' +
+    '<div class="act-main">' +
+    '<button class="btn ghost" data-act="done">完成，返回看板</button>' +
     '<button class="btn primary" data-act="add">＋ 添加硬件</button>' +
+    "</div>" +
+    '<div class="act-bar">' +
+    '<div class="bar-group"><span class="bar-label">记录日</span>' +
     '<input type="date" class="sel-date" id="snapDate2" value="' + U.todayISO() + '">' +
-    '<button class="btn" data-act="snap">记录该日价格</button>' +
+    '<button class="btn sm" data-act="snap">记录该日价格</button>' +
+    "</div>" +
+    '<span class="bar-sep"></span>' +
+    '<div class="bar-group"><span class="bar-label">来源</span>' +
     copySrcHTML(q) +
-    '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button>' +
+    '<button class="btn sm" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button>' +
+    "</div>" +
+    '<span class="bar-spacer"></span>' +
     '<label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录">' +
     '<input type="checkbox" id="autoRec" checked> 自动记价</label>' +
-    '<button class="btn" data-act="done">完成，返回看板</button>' +
+    "</div>" +
     "</div>" +
     "</div>" +
     '<div class="card"><div class="table-wrap"><table class="sheet"><thead><tr>' +
-    '<th class="c-idx" style="text-align:center">序号</th>' +
+    '<th class="c-idx">序号</th>' +
     '<th class="c-name">产品名称</th><th class="c-brand">品牌</th><th class="c-model">型号</th>' +
     '<th class="c-spec">基本参数 / 说明</th>' +
-    '<th class="c-qty" style="text-align:center">数量 / 单位</th>' +
-    '<th class="c-price" style="text-align:right">单价 ¥</th>' +
-    '<th class="c-sub" style="text-align:right">小计 ¥</th>' +
+    '<th class="c-qty">数量 / 单位</th>' +
+    '<th class="c-price">单价 ¥</th>' +
+    '<th class="c-sub">小计 ¥</th>' +
     '<th class="c-trend">价格走势</th><th class="c-link">商品链接</th><th class="c-act">操作</th>' +
     "</tr></thead><tbody id=\"sheetBody\"></tbody>" +
     '<tfoot class="sum"><tr>' +
-    '<td colspan="5" style="text-align:right;color:var(--ink-2);font-weight:500">合计</td>' +
-    '<td style="text-align:center" id="fQty">0</td>' +
-    '<td style="text-align:right;font-size:12px;color:var(--ink-3);font-weight:500" id="fPriced"></td>' +
+    '<td colspan="5" class="lbl">合计</td>' +
+    '<td class="qty" id="fQty">0</td>' +
+    '<td class="priced" id="fPriced"></td>' +
     '<td class="t" id="fTotal">¥0.00</td>' +
     '<td colspan="3"></td>' +
     "</tr></tfoot></table></div></div>"
@@ -129,12 +140,15 @@ function renderSheet(): void {
   renderFoot();
 }
 
+/* scrollHeight 不含边框，直接当 height 用会矮 2px 把最后一行切掉 */
+function grow(el: HTMLTextAreaElement): void {
+  el.style.height = "auto";
+  const border = el.offsetHeight - el.clientHeight;
+  el.style.height = Math.max(31, el.scrollHeight + border) + "px";
+}
+
 function autoGrowAll(): void {
-  const list = document.querySelectorAll<HTMLTextAreaElement>("textarea.cell");
-  list.forEach((el) => {
-    el.style.height = "auto";
-    el.style.height = Math.max(31, el.scrollHeight) + "px";
-  });
+  document.querySelectorAll<HTMLTextAreaElement>("textarea.cell").forEach(grow);
 }
 
 function renderFoot(): void {
@@ -282,8 +296,7 @@ function bind(): void {
       el.classList.toggle("empty", mv.trim() === "");
     } else if (f === "spec") {
       it.spec = el.value;
-      el.style.height = "auto";
-      el.style.height = Math.max(31, el.scrollHeight) + "px";
+      grow(el as HTMLTextAreaElement);
     } else if (f in it) {
       (it as unknown as Record<string, string>)[f] = el.value;
     }

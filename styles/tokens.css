@@ -1,89 +1,170 @@
 /* =========================================================
-   tokens.css — iOS 风格设计令牌 + 基础重置
-   （iOS 18 Light：系统分组背景、SF 字体栈、蓝色强调色）
+   tokens.css — 设计系统底座
+   设计语言：Quiet Precision（冷静精密）
+   —— 中性冷灰画布 + 纯白表面 + 单一钴蓝强调色
+   —— 层次靠「留白 / 字重 / 极浅描边」建立，不靠颜色堆叠
+   —— 语义色（涨红跌绿）只出现在数字本身，绝不铺满界面
    ========================================================= */
+
 :root{
-  /* 表面与线条（iOS systemGroupedBackground / separator） */
-  --bg:#F2F2F7;
-  --surface:#FFFFFF;
-  --surface-2:#F7F7FA;
-  --line:rgba(60,60,67,0.12);
-  --line-2:rgba(60,60,67,0.24);
+  color-scheme: light;
 
-  /* 文字（iOS label 色阶） */
-  --ink:#000000;
-  --ink-2:rgba(60,60,67,0.6);
-  --ink-3:rgba(60,60,67,0.35);
-  --ink-4:rgba(60,60,67,0.2);
+  /* ---------- 画布与表面 ---------- */
+  --bg:#F4F5F7;              /* 页面底色：冷调中性灰 */
+  --bg-top:#FAFBFC;          /* 顶部提亮，给页面一个极轻的光源感 */
+  --surface:#FFFFFF;         /* 卡片 / 面板 */
+  --surface-2:#F7F8FA;       /* 次级填充（统计小块、表头） */
+  --surface-3:#EEF0F4;       /* 三级填充（hover、开关槽） */
 
-  /* 品牌（iOS systemBlue） */
-  --brand:#007AFF;
-  --brand-2:#0A84FF;
-  --brand-soft:rgba(0,122,255,0.09);
-  --brand-line:rgba(0,122,255,0.26);
+  /* ---------- 描边（只用极浅的中性灰，不用半像素） ---------- */
+  --line:#ECEEF2;            /* 结构线：卡片、分区 */
+  --line-2:#E1E5EB;          /* 控件描边 */
+  --line-3:#CFD5DE;          /* hover / 强调描边 */
 
-  /* 涨跌（中国习惯：涨红跌绿，映射 iOS systemRed / systemGreen） */
-  --up:#FF3B30;
-  --up-soft:rgba(255,59,48,0.09);
-  --down:#34C759;
-  --down-soft:rgba(52,199,89,0.13);
+  /* ---------- 文字（四级灰阶，层级清晰） ---------- */
+  --ink:#0B0E14;             /* 主文字：近黑 */
+  --ink-2:#4B5565;           /* 次级：正文说明 */
+  --ink-3:#78828F;           /* 三级：标签、单位 */
+  --ink-4:#A5AEBB;           /* 四级：脚注、占位 */
 
-  /* 提示（iOS systemOrange） */
-  --amber:#FF9500;
-  --amber-soft:rgba(255,149,0,0.12);
-  --amber-line:rgba(255,149,0,0.34);
+  /* ---------- 强调色：钴蓝（唯一彩色主色） ---------- */
+  --brand:#2B50E8;
+  --brand-2:#1B3AC4;
+  --brand-soft:#EEF1FE;
+  --brand-line:#CBD6FB;
+  --brand-glow:rgba(43,80,232,.26);
 
-  /* 圆角 / 阴影（iOS 大圆角 + 柔和阴影） */
-  --r-sm:10px;
-  --r-md:14px;
-  --r-lg:18px;
-  --r-xl:22px;
-  --sh-1:0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.05);
-  --sh-2:0 3px 10px rgba(0,0,0,.06), 0 10px 26px rgba(0,0,0,.05);
-  --sh-3:0 12px 44px rgba(0,0,0,.16), 0 3px 14px rgba(0,0,0,.09);
+  /* ---------- 语义色：涨红跌绿（中式习惯） ---------- */
+  --up:#D93B3B;
+  --up-soft:#FCEEEE;
+  --up-line:#F3D3D3;
+  --down:#0F9D63;
+  --down-soft:#E9F7F0;
+  --down-line:#C8E9DA;
+  --amber:#A9761B;
+  --amber-soft:#FDF6E7;
+  --amber-line:#F0E0BB;
 
-  /* 字体（SF / PingFang） */
-  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","PingFang SC","Helvetica Neue","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  /* ---------- 深色面（主 KPI / 提示条） ---------- */
+  --ink-panel:#141924;
+  --ink-panel-2:#0A0D14;
+
+  /* ---------- 圆角（6 档，全局统一） ---------- */
+  --r-xs:6px;
+  --r-sm:9px;
+  --r-md:12px;
+  --r-lg:16px;
+  --r-xl:20px;
+  --r-pill:999px;
+
+  /* ---------- 阴影（分层、极淡；与描边二选一，不叠加脏感） ---------- */
+  --sh-1:0 1px 2px rgba(16,24,40,.04), 0 1px 1px rgba(16,24,40,.03);
+  --sh-2:0 2px 4px rgba(16,24,40,.04), 0 10px 24px -12px rgba(16,24,40,.14);
+  --sh-3:0 12px 28px -10px rgba(16,24,40,.14), 0 44px 80px -36px rgba(16,24,40,.30);
+  --sh-inset:inset 0 1px 0 rgba(255,255,255,.10);
+
+  /* ---------- 动效 ---------- */
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --t-fast:120ms;
+  --t:180ms;
+  --t-slow:280ms;
+
+  /* ---------- 排版 ---------- */
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable Text","Segoe UI",
+         "PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"SF Mono","Cascadia Mono","JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+
+  --fs-display:31px;         /* 主 KPI 数字 */
+  --fs-h1:23px;              /* 报价单标题 */
+  --fs-h2:15px;              /* 卡片标题 */
+  --fs-h3:13px;              /* 小标题 / 区块 */
+  --fs-body:13px;            /* 正文 */
+  --fs-sm:12px;              /* 次要 */
+  --fs-xs:11px;              /* 标签 / 脚注 */
+
+  /* ---------- 布局节奏 ---------- */
+  --appbar-h:60px;
+  --side-w:300px;
+  --main-max:1440px;
+  --gap:16px;
 }
 
-*{box-sizing:border-box;}
+/* =========================================================
+   基础重置
+   ========================================================= */
+*,*::before,*::after{box-sizing:border-box;}
+[hidden]{display:none !important;}
+
 html,body{height:100%;}
 body{
   margin:0;
-  background:
-    radial-gradient(1200px 500px at 85% -10%, rgba(0,122,255,.05), transparent 60%),
-    var(--bg);
-  color:var(--ink);
   font-family:var(--sans);
-  font-size:14px;
+  font-size:var(--fs-body);
   line-height:1.55;
+  color:var(--ink);
+  background:var(--bg);
+  background-image:
+    radial-gradient(1100px 480px at 14% -10%, rgba(43,80,232,.05), transparent 60%),
+    linear-gradient(180deg, var(--bg-top) 0, var(--bg) 420px);
+  background-repeat:no-repeat;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   text-rendering:optimizeLegibility;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
 }
+
+h1,h2,h3,h4,p{margin:0;}
+b,strong{font-weight:650;}
+
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
 button{cursor:pointer;}
-b,strong{font-weight:700;}
+a{color:var(--brand);}
 
-/* 细滚动条（类似 iOS） */
-::-webkit-scrollbar{width:9px;height:9px;}
-::-webkit-scrollbar-thumb{background:rgba(60,60,67,.18);border-radius:6px;border:2.5px solid transparent;background-clip:content-box;}
-::-webkit-scrollbar-thumb:hover{background:rgba(60,60,67,.3);background-clip:content-box;}
-::-webkit-scrollbar-track{background:transparent;}
+/* 金额 / 数量一律等宽数字，避免跳动 */
+.num,.kpi .v,.q-total,.sub-cell,.rec-price,.rec-delta,.mstat .v,#fTotal,#fQty,.t,
+.hw-foot .v,.qd-table .n,.qd-total{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
 
-[hidden]{display:none !important;}
-.numeric,.kpi .v,.q-total,.tfoot .t{font-variant-numeric:tabular-nums;}
-.grow{flex:1;}
+.grow{flex:1 1 auto;}
 
-/* 启动失败兜底提示 */
-#bootError{
-  position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.82);color:#fff;
-  display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+/* 极细滚动条 */
+*::-webkit-scrollbar{width:9px;height:9px;}
+*::-webkit-scrollbar-track{background:transparent;}
+*::-webkit-scrollbar-thumb{
+  background:rgba(120,130,143,.26);border-radius:99px;
+  border:2.5px solid transparent;background-clip:content-box;
 }
-#bootError div{max-width:520px;line-height:1.9;}
-#bootError b{display:block;font-size:17px;margin-bottom:10px;}
-#bootError code{background:rgba(255,255,255,.16);border-radius:6px;padding:1px 6px;font-size:12px;}
+*::-webkit-scrollbar-thumb:hover{background:rgba(120,130,143,.42);background-clip:content-box;}
+*{scrollbar-width:thin;scrollbar-color:rgba(120,130,143,.32) transparent;}
+
+::selection{background:rgba(43,80,232,.16);}
+
+/* 键盘可达性：统一焦点环 */
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+
+/* =========================================================
+   启动兜底
+   ========================================================= */
+#bootError{
+  position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:var(--bg);font-size:13px;line-height:1.9;color:var(--ink-2);
+}
+#bootError>div{
+  max-width:560px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:24px 26px;box-shadow:var(--sh-2);
+}
+#bootError b{display:block;font-size:15px;color:var(--ink);margin-bottom:10px;}
+#bootError code{
+  font-family:var(--mono);font-size:12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:var(--r-xs);padding:1px 5px;
+}
+
+/* =========================================================
+   降低动效偏好
+   ========================================================= */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}

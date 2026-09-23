@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "AI 一体机硬件价格监控与报价单管理系统 —— TypeScript 版，iOS 风格界面，纯前端、数据保存在本机",
+  "description": "AI 一体机硬件价格监控与报价单管理系统 —— TypeScript + 零依赖纯前端，冷静精密（Quiet Precision）界面，数据保存在本机",
   "keywords": [
     "quotation",
     "price-monitor",
     "typescript",
-    "ios-style",
+    "zero-dependency",
     "报价单",
     "价格监控"
   ],

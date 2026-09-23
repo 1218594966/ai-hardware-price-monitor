@@ -44,42 +44,53 @@ ok((await page.locator(".hw-card").count()) === 14, "默认报价单渲染 14 �
 ok(await page.locator(".card-body svg").count().then((n) => n >= 1), "总价走势 SVG 已渲染（默认历史价）");
 ok(await page.locator(".hw-spark svg").count().then((n) => n >= 1), "迷你走势 SVG 已渲染");
 
-/* ---- 计算样式检查 ---- */
+/* ---- 计算样式检查（守护「冷静精密」设计语言，见 styles/tokens.css） ---- */
 const info = await page.evaluate(() => {
   const cs = (el) => (el ? getComputedStyle(el) : null);
   const appbar = cs(document.querySelector(".appbar"));
   const hero = cs(document.querySelector(".kpi.hero"));
-  const card = cs(document.querySelector(".kpi"));
+  const board = cs(document.querySelector(".kpis"));
+  const kpi2 = cs(document.querySelectorAll(".kpi")[1]);
   const seg = cs(document.querySelector(".seg"));
   const title = cs(document.querySelector(".q-title"));
   const segActive = cs(document.querySelector(".seg button.on"));
   const hwCard = cs(document.querySelector(".hw-card"));
+  const card = cs(document.querySelector(".card"));
+  const total = cs(document.querySelector(".q-item .q-total"));
+  const body = cs(document.body);
   return {
     appbarBackdrop: appbar ? appbar.backdropFilter || appbar.webkitBackdropFilter : "",
     appbarBg: appbar ? appbar.backgroundColor : "",
     heroBg: hero ? hero.backgroundImage : "",
     heroColor: hero ? hero.color : "",
-    cardRadius: card ? card.borderRadius : "",
+    boardBg: board ? board.backgroundColor : "",
+    boardRadius: board ? board.borderRadius : "",
+    kpiDivider: kpi2 ? kpi2.borderLeftWidth + " " + kpi2.borderLeftColor : "",
     segBg: seg ? seg.backgroundColor : "",
     segActiveBg: segActive ? segActive.backgroundColor : "",
     titleFont: title ? title.fontSize + " / " + title.fontWeight : "",
-    titleFamily: title ? title.fontFamily : "",
     hwRadius: hwCard ? hwCard.borderRadius : "",
-    bodyFont: cs(document.body).fontFamily,
+    cardShadow: card ? card.boxShadow : "",
+    totalColor: total ? total.color : "",
+    bodyFont: body.fontFamily,
     noHOverflow: document.documentElement.scrollWidth <= window.innerWidth + 2
   };
 });
 
-ok(/blur|saturate/.test(info.appbarBackdrop || ""), "导航栏有毛玻璃 backdrop-filter：" + info.appbarBackdrop);
-ok(/rgba\(250, 250, 252/.test(info.appbarBg), "导航栏半透明白底");
-ok(/linear-gradient/.test(info.heroBg), "hero KPI 是渐变卡片（iOS 蓝）");
+ok(/blur|saturate/.test(info.appbarBackdrop || ""), "顶栏毛玻璃 backdrop-filter：" + info.appbarBackdrop);
+ok(/rgba\(255, 255, 255/.test(info.appbarBg), "顶栏半透明白底（冷白，不再偏暖）：" + info.appbarBg);
+ok(/linear-gradient/.test(info.heroBg), "hero KPI 是深色渐变面板");
 ok(info.heroColor === "rgb(255, 255, 255)", "hero KPI 白字");
-ok(parseFloat(info.cardRadius) >= 16, "KPI 大圆角：" + info.cardRadius);
-ok(/#E9E9EB|rgb\(233, 233, 235\)/.test(info.segBg), "分段控件 iOS 灰色底");
+ok(info.boardBg === "rgb(255, 255, 255)", "KPI 合并为一块纯白板：" + info.boardBg);
+ok(parseFloat(info.boardRadius) >= 14, "KPI 白板圆角：" + info.boardRadius);
+ok(/^1px /.test(info.kpiDivider), "KPI 之间用 1px 极浅竖线分隔：" + info.kpiDivider);
+ok(/rgb\(238, 240, 244\)/.test(info.segBg), "分段控件浅灰轨道：" + info.segBg);
 ok(info.segActiveBg === "rgb(255, 255, 255)", "分段控件选中段为白色");
-ok(parseFloat(info.titleFont) >= 24, "报价单大标题 ≥ 24px：" + info.titleFont);
-ok(/-apple-system|SF Pro|PingFang/.test(info.bodyFont), "正文使用 SF/PingFang 字体栈");
-ok(parseFloat(info.hwRadius) >= 16, "硬件卡片大圆角：" + info.hwRadius);
+ok(parseFloat(info.titleFont) >= 22, "报价单大标题 ≥ 22px：" + info.titleFont);
+ok(parseFloat(info.hwRadius) >= 14, "硬件卡片圆角：" + info.hwRadius);
+ok(/-apple-system|SF Pro|Segoe|PingFang/.test(info.bodyFont), "正文使用系统无衬线字体栈");
+ok(info.totalColor !== "rgb(43, 80, 232)", "侧栏金额不再滥用品牌蓝（蓝只留给主操作）：" + info.totalColor);
+ok(/rgba\(16, 24, 40, 0\.0\d/.test(info.cardShadow), "卡片投影极浅，层次靠描边与留白：" + info.cardShadow);
 ok(info.noHOverflow, "无横向溢出");
 
 /* ---- 截图 ---- */

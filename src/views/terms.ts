@@ -35,7 +35,7 @@ function render(): void {
       "<tr>" +
       '<td class="term-label"><input data-ti="' + i + '" data-tf="label" value="' + U.esc(t.label) + '" placeholder="条款名"></td>' +
       '<td><input data-ti="' + i + '" data-tf="value" value="' + U.esc(t.value) + '" placeholder="条款内容"></td>' +
-      '<td style="width:44px;text-align:right">' +
+      '<td class="rc-act">' +
       '<button class="mini-btn del" data-act="termdel" data-ti="' + i + '" title="删除这条条款">✕</button></td>' +
       "</tr>"
     );

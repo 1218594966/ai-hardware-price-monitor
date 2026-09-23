@@ -39,7 +39,7 @@ function itemHTML(q: Quotation): string {
     '<span class="q-meta">' + q.items.length + " 项 · " + s.length + " 个记录日</span>" +
     '<span class="q-spark">' +
     (s.length >= 2 ? C.spark(s, { width: 56, height: 20, pad: 2 }) : '<span class="q-nohist">暂无走势</span>') +
-    (t ? '<span class="badge ' + t.cls + '" style="font-size:10px;padding:1px 5px">' + t.txt + "</span>" : "") +
+    (t ? '<span class="badge xs ' + t.cls + '">' + t.txt + "</span>" : "") +
     "</span>" +
     "</div>" +
     "</div>"
@@ -51,7 +51,7 @@ function render(): void {
   if (!box) return;
   const list = S.all();
   if (!list.length) {
-    box.innerHTML = '<div class="empty" style="padding:30px 10px"><b>还没有报价单</b><p>点上方「＋ 新建」开始</p></div>';
+    box.innerHTML = '<div class="empty tight"><b>还没有报价单</b><p>点上方「＋ 新建」开始</p></div>';
   } else {
     box.innerHTML = list.map(itemHTML).join("");
   }

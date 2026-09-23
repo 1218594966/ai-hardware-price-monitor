@@ -114,14 +114,14 @@ export function line(points: LinePoint[], opt: LineOptions = {}): string {
   const Y = (v: number): number => padT + ih * (1 - (v - min) / range);
 
   const diff = vals[n - 1] - vals[0];
-  const color = opt.color || (diff > 0 ? "#FF3B30" : diff < 0 ? "#34C759" : "#007AFF");
+  const color = opt.color || (diff > 0 ? "#D93B3B" : diff < 0 ? "#0F9D63" : "#2B50E8");
   const gid = "cg" + ++seq;
 
-  let s = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" preserveAspectRatio="xMidYMid meet" role="img" style="display:block">';
+  let s = '<svg class="chart-svg" viewBox="0 0 ' + W + " " + H + '" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
   s +=
     '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
-    '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.20"/>' +
-    '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.01"/></linearGradient></defs>';
+    '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.15"/>' +
+    '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.005"/></linearGradient></defs>';
 
   let k: number;
   for (k = 0; k <= ticks; k++) {
@@ -129,9 +129,9 @@ export function line(points: LinePoint[], opt: LineOptions = {}): string {
     const y = Y(v);
     s +=
       '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) +
-      '" stroke="rgba(60,60,67,0.10)" stroke-width="1"/>';
+      '" stroke="#ECEEF2" stroke-width="1"/>';
     s +=
-      '<text x="' + (padL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="rgba(60,60,67,0.35)">' +
+      '<text x="' + (padL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#A5AEBB">' +
       axisLabel(v, step) + "</text>";
   }
 
@@ -147,7 +147,7 @@ export function line(points: LinePoint[], opt: LineOptions = {}): string {
     if (seen[ii]) continue;
     seen[ii] = 1;
     s +=
-      '<text x="' + X(ii).toFixed(1) + '" y="' + (H - padB + 19) + '" text-anchor="middle" font-size="11" fill="rgba(60,60,67,0.35)">' +
+      '<text x="' + X(ii).toFixed(1) + '" y="' + (H - padB + 19) + '" text-anchor="middle" font-size="11" fill="#A5AEBB">' +
       fmtDate(points[ii].date) + "</text>";
   }
 
@@ -205,7 +205,7 @@ export function spark(hist: SparkPoint[], opt: SparkOptions = {}): string {
   const flat = hi === lo;
   const span = hi - lo || 1;
   const diff = vals[n - 1] - vals[0];
-  const color = opt.color || (diff > 0 ? "#FF3B30" : diff < 0 ? "#34C759" : "rgba(60,60,67,0.35)");
+  const color = opt.color || (diff > 0 ? "#D93B3B" : diff < 0 ? "#0F9D63" : "#A5AEBB");
   const gid = "sg" + ++seq;
 
   const pts: Array<[number, number]> = [];
@@ -219,7 +219,7 @@ export function spark(hist: SparkPoint[], opt: SparkOptions = {}): string {
   if (n >= 2 && !flat) {
     s +=
       '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.22"/>' +
+      '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.18"/>' +
       '<stop offset="100%" stop-color="' + color + '" stop-opacity="0.0"/></linearGradient></defs>';
     s +=
       "<path d=M" + pts[0][0].toFixed(1) + "," + H + " " +

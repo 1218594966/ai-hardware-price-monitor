@@ -30,7 +30,8 @@ const js = readFileSync(resolve(dist, "assets/app.js"), "utf8");
 ok(html.includes('href="assets/app.css"'), "index.html 引用打包后的 CSS");
 ok(html.includes('src="assets/app.js"'), "index.html 引用打包后的 JS");
 ok(!html.includes("../src/"), "产物不残留源码相对路径");
-ok(css.includes("--brand:#007AFF"), "iOS 蓝色强调色已进入产物");
+ok(css.includes("--brand:#2B50E8"), "品牌钴蓝强调色已进入产物");
+ok(css.includes("--up:#D93B3B") && css.includes("--down:#0F9D63"), "涨红跌绿语义色已进入产物");
 ok(css.includes("backdrop-filter"), "毛玻璃效果样式已进入产物");
 ok(js.includes("报价单管理"), "JS 产物包含应用代码");
 

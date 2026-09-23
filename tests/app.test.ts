@@ -332,20 +332,20 @@ describe("4. 总价走势（含单日显示与口径切换）", () => {
     click(w, p.$('#segTrend [data-mode="total"]'));
     eq(S.state.trendMode, "total", "切回「实际总价」");
 
-    /* 涨跌配色（中国习惯：涨红跌绿，iOS 红 #FF3B30 / 绿 #34C759） */
+    /* 涨跌配色（中国习惯：涨红跌绿，新配色见 styles/tokens.css） */
     has(
       charts.line([{ date: "2026-09-01", price: 100 }, { date: "2026-09-10", price: 200 }]),
-      "#FF3B30",
-      "上涨用红色 #FF3B30"
+      "#D93B3B",
+      "上涨用红色 #D93B3B"
     );
     has(
       charts.line([{ date: "2026-09-01", price: 200 }, { date: "2026-09-10", price: 100 }]),
-      "#34C759",
-      "下跌用绿色 #34C759"
+      "#0F9D63",
+      "下跌用绿色 #0F9D63"
     );
     has(
       charts.spark([{ date: "2026-09-01", price: 200 }, { date: "2026-09-10", price: 100 }]),
-      "#34C759",
+      "#0F9D63",
       "迷你走势同样涨红跌绿"
     );
   });

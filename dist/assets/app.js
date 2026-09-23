@@ -856,16 +856,16 @@
     const X = (i) => t1 === t0 ? padL + iw * (n === 1 ? 0.5 : i / (n - 1)) : padL + iw * (times[i] - t0) / (t1 - t0);
     const Y = (v) => padT + ih * (1 - (v - min) / range);
     const diff = vals[n - 1] - vals[0];
-    const color = opt.color || (diff > 0 ? "#FF3B30" : diff < 0 ? "#34C759" : "#007AFF");
+    const color = opt.color || (diff > 0 ? "#D93B3B" : diff < 0 ? "#0F9D63" : "#2B50E8");
     const gid = "cg" + ++seq;
-    let s = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" preserveAspectRatio="xMidYMid meet" role="img" style="display:block">';
-    s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.20"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.01"/></linearGradient></defs>';
+    let s = '<svg class="chart-svg" viewBox="0 0 ' + W + " " + H + '" width="100%" preserveAspectRatio="xMidYMid meet" role="img">';
+    s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.15"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.005"/></linearGradient></defs>';
     let k;
     for (k = 0; k <= ticks; k++) {
       const v = min + step * k;
       const y = Y(v);
-      s += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="rgba(60,60,67,0.10)" stroke-width="1"/>';
-      s += '<text x="' + (padL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="rgba(60,60,67,0.35)">' + axisLabel(v, step) + "</text>";
+      s += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y.toFixed(1) + '" stroke="#ECEEF2" stroke-width="1"/>';
+      s += '<text x="' + (padL - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#A5AEBB">' + axisLabel(v, step) + "</text>";
     }
     const idxs = [];
     const seen = {};
@@ -878,7 +878,7 @@
       const ii = idxs[k];
       if (seen[ii]) continue;
       seen[ii] = 1;
-      s += '<text x="' + X(ii).toFixed(1) + '" y="' + (H - padB + 19) + '" text-anchor="middle" font-size="11" fill="rgba(60,60,67,0.35)">' + fmtDate(points[ii].date) + "</text>";
+      s += '<text x="' + X(ii).toFixed(1) + '" y="' + (H - padB + 19) + '" text-anchor="middle" font-size="11" fill="#A5AEBB">' + fmtDate(points[ii].date) + "</text>";
     }
     const sx = [];
     const sy = [];
@@ -915,7 +915,7 @@
     const flat = hi === lo;
     const span = hi - lo || 1;
     const diff = vals[n - 1] - vals[0];
-    const color = opt.color || (diff > 0 ? "#FF3B30" : diff < 0 ? "#34C759" : "rgba(60,60,67,0.35)");
+    const color = opt.color || (diff > 0 ? "#D93B3B" : diff < 0 ? "#0F9D63" : "#A5AEBB");
     const gid = "sg" + ++seq;
     const pts = [];
     for (let i = 0; i < n; i++) {
@@ -925,7 +925,7 @@
     }
     let s = '<svg class="sparkline" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">';
     if (n >= 2 && !flat) {
-      s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.22"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.0"/></linearGradient></defs>';
+      s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + color + '" stop-opacity="0.18"/><stop offset="100%" stop-color="' + color + '" stop-opacity="0.0"/></linearGradient></defs>';
       s += "<path d=M" + pts[0][0].toFixed(1) + "," + H + " " + pts.map((q) => "L" + q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ") + " L" + pts[n - 1][0].toFixed(1) + "," + H + ' Z" fill="url(#' + gid + ')"/>';
       s += '<polyline points="' + pts.map((q) => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ") + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
     } else {
@@ -960,14 +960,14 @@
     const t = sparkChange(q);
     const total = store.totalOf(q, "total");
     const act = q.id === store.state.activeId;
-    return '<div class="q-item' + (act ? " active" : "") + '" data-q="' + q.id + '" title="' + util.esc(q.name) + '"><div class="q-top"><span class="q-name">' + util.esc(q.name || "未命名报价单") + '</span><span class="q-total">' + util.moneyShort(total) + '</span></div><div class="q-sub"><span class="q-meta">' + q.items.length + " 项 · " + s.length + ' 个记录日</span><span class="q-spark">' + (s.length >= 2 ? charts.spark(s, { width: 56, height: 20, pad: 2 }) : '<span class="q-nohist">暂无走势</span>') + (t ? '<span class="badge ' + t.cls + '" style="font-size:10px;padding:1px 5px">' + t.txt + "</span>" : "") + "</span></div></div>";
+    return '<div class="q-item' + (act ? " active" : "") + '" data-q="' + q.id + '" title="' + util.esc(q.name) + '"><div class="q-top"><span class="q-name">' + util.esc(q.name || "未命名报价单") + '</span><span class="q-total">' + util.moneyShort(total) + '</span></div><div class="q-sub"><span class="q-meta">' + q.items.length + " 项 · " + s.length + ' 个记录日</span><span class="q-spark">' + (s.length >= 2 ? charts.spark(s, { width: 56, height: 20, pad: 2 }) : '<span class="q-nohist">暂无走势</span>') + (t ? '<span class="badge xs ' + t.cls + '">' + t.txt + "</span>" : "") + "</span></div></div>";
   }
   function render() {
     const box = document.getElementById("qList");
     if (!box) return;
     const list = store.all();
     if (!list.length) {
-      box.innerHTML = '<div class="empty" style="padding:30px 10px"><b>还没有报价单</b><p>点上方「＋ 新建」开始</p></div>';
+      box.innerHTML = '<div class="empty tight"><b>还没有报价单</b><p>点上方「＋ 新建」开始</p></div>';
     } else {
       box.innerHTML = list.map(itemHTML).join("");
     }
@@ -1010,7 +1010,7 @@
     let sum = 0;
     for (const v of vals) sum += v;
     const sign = t.diff > 0 ? "+" : "−";
-    box.innerHTML = stat("记录条数", t.h.length + " 条") + stat("最新单价", util.money(t.last)) + stat("首次单价", util.money(t.first)) + '<div class="mstat"><div class="k">累计变动</div>' + (t.diff === 0 ? '<div class="v sm" style="color:var(--ink-3)">持平</div>' : '<div class="v sm ' + t.cls + '">' + sign + util.money(Math.abs(t.diff)) + "（" + sign + Math.abs(t.pct).toFixed(2) + "%）</div>") + "</div>" + stat("最高", util.money(mx)) + stat("最低", util.money(mn)) + stat("平均", util.money(sum / vals.length));
+    box.innerHTML = stat("记录条数", t.h.length + " 条") + stat("最新单价", util.money(t.last)) + stat("首次单价", util.money(t.first)) + '<div class="mstat"><div class="k">累计变动</div>' + (t.diff === 0 ? '<div class="v sm muted">持平</div>' : '<div class="v sm ' + t.cls + '">' + sign + util.money(Math.abs(t.diff)) + "（" + sign + Math.abs(t.pct).toFixed(2) + "%）</div>") + "</div>" + stat("最高", util.money(mx)) + stat("最低", util.money(mn)) + stat("平均", util.money(sum / vals.length));
   }
   function renderChart(it) {
     const t = store.trendOf(it);
@@ -1033,9 +1033,9 @@
       const d = prev === null ? null : util.num(r.price) - prev;
       const cls = d === null || d === 0 ? "flat" : d > 0 ? "up" : "down";
       const txt = d === null ? h.length > 1 ? "首条" : "—" : d === 0 ? "0" : (d > 0 ? "+" : "−") + util.money(Math.abs(d));
-      return '<tr><td style="width:150px"><input type="date" data-ri="' + i + '" data-rf="date" value="' + util.esc(r.date) + '"></td><td style="width:132px"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + util.esc(r.price) + '" placeholder="0.00"></td><td class="rec-delta ' + cls + '" style="width:104px" data-rdelta="' + i + '">' + txt + '</td><td><input data-ri="' + i + '" data-rf="note" value="' + util.esc(r.note) + '" placeholder="备注…"></td><td style="width:52px;text-align:right">' + (i === h.length - 1 && h.length > 1 ? '<span class="tag">最新</span>' : "") + '</td><td style="width:44px;text-align:right"><button class="mini-btn del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td></tr>';
+      return '<tr><td class="rc-date"><input type="date" data-ri="' + i + '" data-rf="date" value="' + util.esc(r.date) + '"></td><td class="rc-price"><input class="rec-price" data-ri="' + i + '" data-rf="price" value="' + util.esc(r.price) + '" placeholder="0.00"></td><td class="rec-delta ' + cls + '" data-rdelta="' + i + '">' + txt + '</td><td><input data-ri="' + i + '" data-rf="note" value="' + util.esc(r.note) + '" placeholder="备注…"></td><td class="rc-mark">' + (i === h.length - 1 && h.length > 1 ? '<span class="tag">最新</span>' : "") + '</td><td class="rc-act"><button class="mini-btn del" data-act="recdel" data-ri="' + i + '" title="删除这条记录">✕</button></td></tr>';
     }).join("");
-    box.innerHTML = '<table class="rec-table"><thead><tr><th>日期</th><th style="text-align:right">单价 ¥</th><th style="text-align:right">环比</th><th>备注</th><th></th><th></th></tr></thead><tbody>' + rows + "</tbody></table>";
+    box.innerHTML = '<table class="rec-table"><thead><tr><th class="rc-date">日期</th><th class="rc-price">单价 ¥</th><th class="rec-delta">环比</th><th>备注</th><th></th><th></th></tr></thead><tbody>' + rows + "</tbody></table>";
   }
   function render2() {
     const it = findItem();
@@ -1049,8 +1049,8 @@
     const sub = document.getElementById("mSub");
     if (sub) {
       const parts = [it.brand, it.model].filter(Boolean).join(" · ") || "—";
-      const link = it.link ? '　<a href="' + util.esc(util.normalizeLink(it.link)) + '" target="_blank" rel="noopener" style="color:var(--brand);text-decoration:none">商品链接 ↗</a>' : "";
-      sub.innerHTML = util.esc(parts) + "　当前单价 " + (String(it.price).trim() === "" ? "未填" : util.money(util.num(it.price))) + "　×" + util.esc(it.qty) + " " + util.esc(it.unit) + (q ? '　<span style="color:var(--ink-4)">' + util.esc(q.name) + "</span>" : "") + link;
+      const link = it.link ? '　<a class="m-link" href="' + util.esc(util.normalizeLink(it.link)) + '" target="_blank" rel="noopener">商品链接 ↗</a>' : "";
+      sub.innerHTML = util.esc(parts) + "　当前单价 " + (String(it.price).trim() === "" ? "未填" : util.money(util.num(it.price))) + "　×" + util.esc(it.qty) + " " + util.esc(it.unit) + (q ? '　<span class="m-quiet">' + util.esc(q.name) + "</span>" : "") + link;
     }
     renderStats(it);
     renderChart(it);
@@ -1250,7 +1250,7 @@
       return;
     }
     const rows = q.terms.map((t, i) => {
-      return '<tr><td class="term-label"><input data-ti="' + i + '" data-tf="label" value="' + util.esc(t.label) + '" placeholder="条款名"></td><td><input data-ti="' + i + '" data-tf="value" value="' + util.esc(t.value) + '" placeholder="条款内容"></td><td style="width:44px;text-align:right"><button class="mini-btn del" data-act="termdel" data-ti="' + i + '" title="删除这条条款">✕</button></td></tr>';
+      return '<tr><td class="term-label"><input data-ti="' + i + '" data-tf="label" value="' + util.esc(t.label) + '" placeholder="条款名"></td><td><input data-ti="' + i + '" data-tf="value" value="' + util.esc(t.value) + '" placeholder="条款内容"></td><td class="rc-act"><button class="mini-btn del" data-act="termdel" data-ti="' + i + '" title="删除这条条款">✕</button></td></tr>';
     }).join("");
     box.innerHTML = '<table class="rec-table"><thead><tr><th>条款名</th><th>条款内容</th><th></th></tr></thead><tbody>' + rows + "</tbody></table>";
   }
@@ -1428,11 +1428,11 @@
     let deltaHTML;
     if (delta) {
       const up = delta.diff > 0;
-      deltaHTML = '<div class="v delta ' + (up ? "up" : "down") + '" style="font-size:19px">' + (up ? "+" : "−") + util.moneyShort(Math.abs(delta.diff)) + "（" + (up ? "+" : "−") + Math.abs(delta.pct).toFixed(2) + "%）</div>";
+      deltaHTML = '<div class="v delta ' + (up ? "up" : "down") + '">' + (up ? "+" : "−") + util.moneyShort(Math.abs(delta.diff)) + "（" + (up ? "+" : "−") + Math.abs(delta.pct).toFixed(2) + "%）</div>";
     } else {
-      deltaHTML = '<div class="v" style="font-size:19px;color:var(--ink-3)">—</div>';
+      deltaHTML = '<div class="v delta muted">—</div>';
     }
-    return '<div class="kpis"><div class="kpi hero"><div class="k">' + heroLabel + '</div><div class="v">' + util.money(hero) + '</div><div class="foot" style="color:rgba(255,255,255,.85)">' + heroFoot + '</div></div><div class="kpi"><div class="k">硬件项数</div><div class="v">' + st.items + '<small>项</small></div><div class="foot">共 ' + st.qty + " 件 / 套" + (st.missing ? " · " + st.missing + " 项未填价" : "") + '</div></div><div class="kpi"><div class="k">较首日变动</div>' + deltaHTML + '<div class="foot">' + (st.dates > 1 ? "对比 " + st.dates + " 个记录日" : "还需至少 2 个记录日") + '</div></div><div class="kpi"><div class="k">价格记录日</div><div class="v">' + st.dates + '<small>天</small></div><div class="foot">' + (st.lastDate ? "最新 " + util.fmtDateCN(st.lastDate) : "尚未记录") + "</div></div></div>";
+    return '<div class="kpis"><div class="kpi hero"><div class="k">' + heroLabel + '</div><div class="v">' + util.money(hero) + '</div><div class="foot">' + heroFoot + '</div></div><div class="kpi"><div class="k">硬件项数</div><div class="v">' + st.items + '<small>项</small></div><div class="foot">共 ' + st.qty + " 件 / 套" + (st.missing ? " · " + st.missing + " 项未填价" : "") + '</div></div><div class="kpi"><div class="k">较首日变动</div>' + deltaHTML + '<div class="foot">' + (st.dates > 1 ? "对比 " + st.dates + " 个记录日" : "还需至少 2 个记录日") + '</div></div><div class="kpi"><div class="k">价格记录日</div><div class="v">' + st.dates + '<small>天</small></div><div class="foot">' + (st.lastDate ? "最新 " + util.fmtDateCN(st.lastDate) : "尚未记录") + "</div></div></div>";
   }
   function trendCardHTML(q) {
     const series = store.seriesOf(q, store.state.trendMode);
@@ -1441,7 +1441,7 @@
     if (!series.length) {
       body = '<div class="chart-empty">还没有价格记录 —— 点右上角「记录该日价格」给今天打个基线</div>';
     } else {
-      body = charts.line(series, { width: 1e3, height: 262 });
+      body = charts.line(series, { width: 1e3, height: series.length === 1 ? 172 : 262 });
       if (series.length === 1) {
         body += '<div class="note">当前只有 <b>1 个记录日</b>（' + util.fmtDateCN(series[0].date) + "），显示的是当日基线；换个日期再记一次就会连成曲线。</div>";
       }
@@ -1482,7 +1482,7 @@
     } else {
       body = '<div class="sec-head"><h3>硬件价格走势</h3><span class="n">共 ' + q.items.length + ' 项 · 点卡片看价格明细</span></div><div class="hw-grid">' + q.items.map(hwCard).join("") + "</div>";
     }
-    return '<div class="q-head"><div class="q-head-l"><input class="q-title" id="qTitle" value="' + util.esc(q.name) + '" placeholder="给这张报价单起个名字" maxlength="60" title="点击可直接修改报价单名称"><input class="q-note" id="qNote" value="' + util.esc(q.note) + '" placeholder="备注（可选），例如：面向 XX 项目的两台节点" maxlength="120" title="点击可直接修改备注"><p class="q-doc-line">报价单编号 ' + util.esc(q.docNo) + " · 创建于 " + util.fmtDateCN(q.createdAt) + " · " + q.terms.length + ' 条报价条款</p></div><div class="q-actions" id="qActions"><input type="date" class="sel-date" id="snapDate" value="' + util.todayISO() + '"><button class="btn" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button>' + copySrcHTML(q) + '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button><button class="btn" data-act="terms" title="编辑这张报价单的条款">报价条款</button><button class="btn" data-act="dup" title="复制一份当前配置">复制</button><button class="btn primary" data-act="edit">编辑清单</button><button class="btn soft" data-act="quote">生成报价单</button><button class="btn danger" data-act="del">删除</button></div></div>' + kpisHTML(q, st, delta) + trendCardHTML(q) + body;
+    return '<div class="q-head"><div class="q-head-l"><div class="q-eyebrow"><span class="dot"></span>报价单 · ' + util.esc(q.docNo) + '</div><input class="q-title" id="qTitle" value="' + util.esc(q.name) + '" placeholder="给这张报价单起个名字" maxlength="60" title="点击可直接修改报价单名称"><input class="q-note" id="qNote" value="' + util.esc(q.note) + '" placeholder="备注（可选），例如：面向 XX 项目的两台节点" maxlength="120" title="点击可直接修改备注"><p class="q-doc-line">创建于 ' + util.fmtDateCN(q.createdAt) + " · " + q.items.length + " 项硬件 · " + q.terms.length + ' 条报价条款</p></div><div class="q-actions" id="qActions"><div class="act-main"><button class="btn ghost" data-act="terms" title="编辑这张报价单的条款">报价条款</button><button class="btn ghost" data-act="dup" title="复制一份当前配置">复制</button><button class="btn ghost danger" data-act="del">删除</button><button class="btn" data-act="edit">编辑清单</button><button class="btn primary" data-act="quote">生成报价单</button></div><div class="act-bar"><div class="bar-group"><span class="bar-label">记录日</span><input type="date" class="sel-date" id="snapDate" value="' + util.todayISO() + '"><button class="btn sm" data-act="snap" title="把所有已填单价的硬件，按左边选中的日期存一条价格记录">记录该日价格</button></div><span class="bar-sep"></span><div class="bar-group"><span class="bar-label">来源</span>' + copySrcHTML(q) + '<button class="btn sm" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button></div><span class="bar-spacer"></span><span class="bar-hint">记一次价，走势图才有数据</span></div></div></div>' + kpisHTML(q, st, delta) + trendCardHTML(q) + body;
   }
   function bind3() {
     const q = store.active();
@@ -1618,14 +1618,14 @@
   function rowHTML(it, idx, len) {
     const sub = util.num(it.qty) * util.num(it.price);
     const t = store.trendOf(it);
-    const cell = t ? charts.spark(t.h, { width: 104, height: 26, pad: 3 }) : '<span class="no-hist">暂无记录</span>';
-    const badge2 = t && t.h.length >= 2 ? '<span class="badge ' + t.cls + '" style="font-size:10.5px;padding:1px 5px">' + (t.diff > 0 ? "↑" : t.diff < 0 ? "↓" : "—") + Math.abs(t.pct).toFixed(1) + "%</span>" : "";
-    return '<tr data-id="' + it.id + '"><td class="c-idx">' + (idx + 1) + '</td><td><input class="cell" data-f="name" value="' + util.esc(it.name) + '" placeholder="产品名称"></td><td><input class="cell" data-f="brand" value="' + util.esc(it.brand) + '" placeholder="品牌"></td><td><input class="cell" data-f="model" value="' + util.esc(it.model) + '" placeholder="型号"></td><td><textarea class="cell" rows="1" data-f="spec" placeholder="基本参数 / 说明">' + util.esc(it.spec) + '</textarea></td><td><div class="qty-box"><input class="cell num q" data-f="qty" value="' + util.esc(it.qty) + '" placeholder="1"><input class="cell u" data-f="unit" value="' + util.esc(it.unit) + '" placeholder="个"></div></td><td><input class="cell money' + (String(it.price).trim() === "" ? " empty" : "") + '" data-f="price" value="' + util.esc(it.price) + '" placeholder="0.00" title="手动输入单价" inputmode="decimal"></td><td class="sub-cell' + (sub > 0 ? "" : " zero") + '" data-sub="' + it.id + '">' + (sub > 0 ? util.money(sub) : "—") + '</td><td><div class="nd" data-act="trend" data-id="' + it.id + '" title="点击查看价格明细" style="cursor:pointer">' + cell + badge2 + '</div></td><td><div class="nd"><input class="cell" data-f="link" value="' + util.esc(it.link) + '" placeholder="粘贴商品链接…"><button class="mini-btn" data-act="open" title="打开商品链接">↗</button></div></td><td><div class="act-box"><button class="mini-btn" data-act="up"' + (idx === 0 ? " disabled" : "") + ' title="上移">↑</button><button class="mini-btn" data-act="down"' + (idx === len - 1 ? " disabled" : "") + ' title="下移">↓</button><button class="mini-btn del" data-act="del" title="删除该硬件">✕</button></div></td></tr>';
+    const cell = t ? charts.spark(t.h, { width: 80, height: 24, pad: 3 }) : '<span class="no-hist">暂无记录</span>';
+    const badge2 = t && t.h.length >= 2 ? '<span class="badge xs ' + t.cls + '">' + (t.diff > 0 ? "↑" : t.diff < 0 ? "↓" : "—") + Math.abs(t.pct).toFixed(1) + "%</span>" : "";
+    return '<tr data-id="' + it.id + '"><td class="c-idx">' + (idx + 1) + '</td><td><input class="cell" data-f="name" value="' + util.esc(it.name) + '" placeholder="产品名称"></td><td><input class="cell" data-f="brand" value="' + util.esc(it.brand) + '" placeholder="品牌"></td><td><input class="cell" data-f="model" value="' + util.esc(it.model) + '" placeholder="型号"></td><td><textarea class="cell" rows="1" data-f="spec" placeholder="基本参数 / 说明"' + (it.spec.length > 34 ? ' title="' + util.esc(it.spec) + '"' : "") + ">" + util.esc(it.spec) + '</textarea></td><td><div class="qty-box"><input class="cell num q" data-f="qty" value="' + util.esc(it.qty) + '" placeholder="1"><input class="cell u" data-f="unit" value="' + util.esc(it.unit) + '" placeholder="个"></div></td><td><input class="cell money' + (String(it.price).trim() === "" ? " empty" : "") + '" data-f="price" value="' + util.esc(it.price) + '" placeholder="0.00" title="手动输入单价" inputmode="decimal"></td><td class="sub-cell' + (sub > 0 ? "" : " zero") + '" data-sub="' + it.id + '">' + (sub > 0 ? util.money(sub) : "—") + '</td><td><div class="nd" data-act="trend" data-id="' + it.id + '" title="点击查看价格明细">' + cell + badge2 + '</div></td><td><div class="nd link-box"><input class="cell" data-f="link" value="' + util.esc(it.link) + '" placeholder="粘贴商品链接…"><button class="mini-btn" data-act="open" title="打开商品链接">↗</button></div></td><td><div class="act-box"><button class="mini-btn" data-act="up"' + (idx === 0 ? " disabled" : "") + ' title="上移">↑</button><button class="mini-btn" data-act="down"' + (idx === len - 1 ? " disabled" : "") + ' title="下移">↓</button><button class="mini-btn del" data-act="del" title="删除该硬件">✕</button></div></td></tr>';
   }
   function html2() {
     const q = store.active();
     if (!q) return '<div class="empty"><b>还没有报价单</b></div>';
-    return '<div class="q-head"><div class="q-head-l"><input class="q-title" id="eqTitle" value="' + util.esc(q.name) + '" placeholder="报价单名称" maxlength="60"><p class="q-doc-line">编辑清单 · 直接点单元格修改 · 单价留空按 0 计算 · 改完单价离开输入框会自动为当天留一条价格记录</p></div><div class="q-actions"><button class="btn primary" data-act="add">＋ 添加硬件</button><input type="date" class="sel-date" id="snapDate2" value="' + util.todayISO() + '"><button class="btn" data-act="snap">记录该日价格</button>' + copySrcHTML2(q) + '<button class="btn" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button><label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录"><input type="checkbox" id="autoRec" checked> 自动记价</label><button class="btn" data-act="done">完成，返回看板</button></div></div><div class="card"><div class="table-wrap"><table class="sheet"><thead><tr><th class="c-idx" style="text-align:center">序号</th><th class="c-name">产品名称</th><th class="c-brand">品牌</th><th class="c-model">型号</th><th class="c-spec">基本参数 / 说明</th><th class="c-qty" style="text-align:center">数量 / 单位</th><th class="c-price" style="text-align:right">单价 ¥</th><th class="c-sub" style="text-align:right">小计 ¥</th><th class="c-trend">价格走势</th><th class="c-link">商品链接</th><th class="c-act">操作</th></tr></thead><tbody id="sheetBody"></tbody><tfoot class="sum"><tr><td colspan="5" style="text-align:right;color:var(--ink-2);font-weight:500">合计</td><td style="text-align:center" id="fQty">0</td><td style="text-align:right;font-size:12px;color:var(--ink-3);font-weight:500" id="fPriced"></td><td class="t" id="fTotal">¥0.00</td><td colspan="3"></td></tr></tfoot></table></div></div>';
+    return '<div class="q-head"><div class="q-head-l"><div class="q-eyebrow"><span class="dot"></span>编辑清单 · ' + util.esc(q.docNo) + '</div><input class="q-title" id="eqTitle" value="' + util.esc(q.name) + '" placeholder="报价单名称" maxlength="60"><p class="q-doc-line">直接点单元格修改 · 单价留空按 0 计算 · 改完单价离开输入框会自动为当天留一条价格记录</p></div><div class="q-actions"><div class="act-main"><button class="btn ghost" data-act="done">完成，返回看板</button><button class="btn primary" data-act="add">＋ 添加硬件</button></div><div class="act-bar"><div class="bar-group"><span class="bar-label">记录日</span><input type="date" class="sel-date" id="snapDate2" value="' + util.todayISO() + '"><button class="btn sm" data-act="snap">记录该日价格</button></div><span class="bar-sep"></span><div class="bar-group"><span class="bar-label">来源</span>' + copySrcHTML2(q) + '<button class="btn sm" data-act="copy" title="把下拉框选中的价格日（如 9.16）的各项已记录价格，一键复制到左边选中的日期（如 9.17）">复制该日价格</button></div><span class="bar-spacer"></span><label class="switch" title="改完单价离开输入框时，自动为当天留下一条价格记录"><input type="checkbox" id="autoRec" checked> 自动记价</label></div></div></div><div class="card"><div class="table-wrap"><table class="sheet"><thead><tr><th class="c-idx">序号</th><th class="c-name">产品名称</th><th class="c-brand">品牌</th><th class="c-model">型号</th><th class="c-spec">基本参数 / 说明</th><th class="c-qty">数量 / 单位</th><th class="c-price">单价 ¥</th><th class="c-sub">小计 ¥</th><th class="c-trend">价格走势</th><th class="c-link">商品链接</th><th class="c-act">操作</th></tr></thead><tbody id="sheetBody"></tbody><tfoot class="sum"><tr><td colspan="5" class="lbl">合计</td><td class="qty" id="fQty">0</td><td class="priced" id="fPriced"></td><td class="t" id="fTotal">¥0.00</td><td colspan="3"></td></tr></tfoot></table></div></div>';
   }
   function renderSheet() {
     const q = store.active();
@@ -1640,12 +1640,13 @@
     autoGrowAll();
     renderFoot();
   }
+  function grow(el) {
+    el.style.height = "auto";
+    const border = el.offsetHeight - el.clientHeight;
+    el.style.height = Math.max(31, el.scrollHeight + border) + "px";
+  }
   function autoGrowAll() {
-    const list = document.querySelectorAll("textarea.cell");
-    list.forEach((el) => {
-      el.style.height = "auto";
-      el.style.height = Math.max(31, el.scrollHeight) + "px";
-    });
+    document.querySelectorAll("textarea.cell").forEach(grow);
   }
   function renderFoot() {
     const q = store.active();
@@ -1776,8 +1777,7 @@
         el.classList.toggle("empty", mv.trim() === "");
       } else if (f === "spec") {
         it.spec = el.value;
-        el.style.height = "auto";
-        el.style.height = Math.max(31, el.scrollHeight) + "px";
+        grow(el);
       } else if (f in it) {
         it[f] = el.value;
       }

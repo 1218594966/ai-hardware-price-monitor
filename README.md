@@ -1,8 +1,8 @@
-# AI 一体机 · 报价单管理 / 价格监控（TypeScript + iOS 风格）
+# AI 一体机 · 报价单管理 / 价格监控（TypeScript · 零依赖纯前端）
 
 针对「AI 一体机 · 硬件价格监控」场景的纯前端报价单管理与价格追踪工具。管理多张报价单（硬件清单、单价×数量小计、历史价格走势、报价条款），并一键生成适合打印 / 存档的报价单（PDF）。
 
-> 由旧版单文件（纯 JS）重构而来：现代 **TypeScript** 工程、ESM 模块化、esbuild 打包、vitest 回归测试，界面全新 **iOS 风格**设计（毛玻璃导航栏、大圆角卡片、SF/PingFang 字体、iOS 蓝强调色）。
+> 由旧版单文件（纯 JS）重构而来：现代 **TypeScript** 工程、ESM 模块化、esbuild 打包、vitest 回归测试，界面按 **「Quiet Precision · 冷静精密」** 重新设计（冷调中性底色 + 纯白面板 + 单一钴蓝强调色，靠留白、字重与极浅描边建立层次）。
 
 ## ✨ 功能
 
@@ -17,14 +17,17 @@
 - **数据安全**：全部保存在浏览器 localStorage（本地），支持 JSON 一键导出 / 导入备份，兼容旧版单文件数据自动迁移
 - **离线可用**：无第三方运行时库、无 CDN，`dist/` 整个文件夹拷走即可用，双击 `index.html` 直接打开
 
-## 🎨 iOS 风格界面
+## 🎨 界面设计（Quiet Precision · 冷静精密）
 
-- 毛玻璃（`backdrop-filter`）导航栏与弹窗头部
-- 13–22px 大圆角卡片、iOS 分组背景（`#F2F2F7`）、发丝线分割
-- 系统蓝 `#007AFF` 强调色、iOS 分段控件（UISegmentedControl）、胶囊徽标
-- SF Pro / PingFang 字体栈，数字等宽（tabular-nums）
-- 涨红跌绿（中国习惯，映射 iOS 红 `#FF3B30` / 绿 `#34C759`）
-- 桌面 / 移动端自适应（窄屏侧栏变顶部横排）
+- **一块画布，一个强调色**：冷调中性底（`#F4F5F7`）+ 纯白面板，全局只用一个钴蓝 `#2B50E8`，且只给主操作 / 交互态 / 金额数字，绝不铺大面积色块
+- **层次不靠颜色靠秩序**：统一圆角梯度（6/9/12/16/20px）、真实 1px 极浅描边（`#ECEEF2`）、克制的两级投影，卡片之间只有留白与发丝线
+- **导航栏**：半透明白 + `backdrop-filter: saturate(180%) blur(20px)` 毛玻璃，滚动时内容在其下柔和淡出
+- **KPI 合并成一块白板**：左侧深色渐变 hero 放总价，右侧三格用 1px 竖线分隔，不再是一堆各自带色的卡片
+- **排版**：SF Pro / Segoe UI Variable / PingFang SC 系统字体栈，标题 700 + 紧字距，小标签 10.5px 加宽字距；所有金额数字 `tabular-nums` 对齐
+- **语义色只落在数字上**：涨红跌绿（`#D93B3B` / `#0F9D63`）、持平用中性灰，不用红绿背景块
+- **表格即表单**：单元格悬停才浮出浅底与描边，聚焦时钴蓝描边 + 柔光圈；长参数自动撑高、超过三行截断并挂 `title` 提示
+- **弹窗 / 条款 / 报价单**：同一套令牌与节奏，报价单打印版保留独立排版（金额大写、条款、签署栏）
+- 桌面 / 移动端自适应（窄屏侧栏变顶部横排卡片），尊重 `prefers-reduced-motion`
 
 ![看板预览](docs/dashboard.png)
 
@@ -34,7 +37,7 @@
 |---|---|
 | 语言 | TypeScript（strict） |
 | 打包 | esbuild → 纯静态 `dist/`（iife 单文件，可 file:// 直接打开） |
-| 测试 | vitest + jsdom（13 组回归）+ 构建产物冒烟 + Playwright/Chromium UI 审计 |
+| 测试 | vitest + jsdom（14 组回归）+ 构建产物冒烟 + Playwright/Chromium UI 审计 |
 | 图表 | 自研手写 SVG（零依赖） |
 | 存储 | localStorage |
 
@@ -51,7 +54,7 @@
 │   ├── charts.ts         # SVG 图表引擎（折线 + 迷你走势）
 │   ├── store.ts          # 数据层：持久化 / 计算 / 旧版迁移
 │   └── views/            # 视图：sidebar / dashboard / editor / modal / terms / quoteDoc
-├── styles/               # iOS 风格样式（tokens / layout / components / print）
+├── styles/               # 设计令牌与样式（tokens / layout / components / print）
 ├── scripts/              # build / preview / snapshot / audit-ui
 ├── tests/                # vitest 回归测试 + 构建产物冒烟测试
 └── dist/                 # 构建产物（可直接使用 / 部署）
